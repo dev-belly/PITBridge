@@ -1,0 +1,231 @@
+{
+  "data_kind": "synthetic",
+  "decisions": [
+    {
+      "decision_at": "2026-02-04T00:00:00.000000+00:00",
+      "decision_id": "SME-A-1",
+      "entity_id": "SME-A"
+    },
+    {
+      "decision_at": "2026-02-15T00:00:00.000000+00:00",
+      "decision_id": "SME-A-2",
+      "entity_id": "SME-A"
+    },
+    {
+      "decision_at": "2026-02-20T00:00:00.000000+00:00",
+      "decision_id": "SME-A-3",
+      "entity_id": "SME-A"
+    },
+    {
+      "decision_at": "2026-03-15T00:00:00.000000+00:00",
+      "decision_id": "SME-A-4",
+      "entity_id": "SME-A"
+    },
+    {
+      "decision_at": "2026-03-25T00:00:00.000000+00:00",
+      "decision_id": "SME-A-5",
+      "entity_id": "SME-A"
+    },
+    {
+      "decision_at": "2026-02-04T00:00:00.000000+00:00",
+      "decision_id": "SME-B-1",
+      "entity_id": "SME-B"
+    },
+    {
+      "decision_at": "2026-02-15T00:00:00.000000+00:00",
+      "decision_id": "SME-B-2",
+      "entity_id": "SME-B"
+    },
+    {
+      "decision_at": "2026-02-20T00:00:00.000000+00:00",
+      "decision_id": "SME-B-3",
+      "entity_id": "SME-B"
+    },
+    {
+      "decision_at": "2026-03-15T00:00:00.000000+00:00",
+      "decision_id": "SME-B-4",
+      "entity_id": "SME-B"
+    },
+    {
+      "decision_at": "2026-03-25T00:00:00.000000+00:00",
+      "decision_id": "SME-B-5",
+      "entity_id": "SME-B"
+    },
+    {
+      "decision_at": "2026-02-04T00:00:00.000000+00:00",
+      "decision_id": "SME-C-1",
+      "entity_id": "SME-C"
+    },
+    {
+      "decision_at": "2026-02-15T00:00:00.000000+00:00",
+      "decision_id": "SME-C-2",
+      "entity_id": "SME-C"
+    },
+    {
+      "decision_at": "2026-02-20T00:00:00.000000+00:00",
+      "decision_id": "SME-C-3",
+      "entity_id": "SME-C"
+    },
+    {
+      "decision_at": "2026-03-15T00:00:00.000000+00:00",
+      "decision_id": "SME-C-4",
+      "entity_id": "SME-C"
+    },
+    {
+      "decision_at": "2026-03-25T00:00:00.000000+00:00",
+      "decision_id": "SME-C-5",
+      "entity_id": "SME-C"
+    }
+  ],
+  "observations": [
+    {
+      "deleted": false,
+      "entity_id": "SME-A",
+      "event_at": "2026-02-10T00:00:00.000000+00:00",
+      "feature": "net_inflow",
+      "ingested_at": "2026-02-11T00:00:00.000000+00:00",
+      "published_at": "2026-02-10T00:00:00.000000+00:00",
+      "record_id": "cash-a",
+      "revision": 1,
+      "source": "bank",
+      "value": 50000
+    },
+    {
+      "deleted": true,
+      "entity_id": "SME-A",
+      "event_at": "2026-02-10T00:00:00.000000+00:00",
+      "feature": "net_inflow",
+      "ingested_at": "2026-02-18T00:00:00.000000+00:00",
+      "published_at": "2026-02-18T00:00:00.000000+00:00",
+      "record_id": "cash-a-delete",
+      "revision": 2,
+      "source": "bank",
+      "value": null
+    },
+    {
+      "deleted": false,
+      "entity_id": "SME-B",
+      "event_at": "2026-02-10T00:00:00.000000+00:00",
+      "feature": "net_inflow",
+      "ingested_at": "2026-02-19T00:00:00.000000+00:00",
+      "published_at": "2026-02-11T00:00:00.000000+00:00",
+      "record_id": "cash-b-v1-delayed",
+      "revision": 1,
+      "source": "bank",
+      "value": 80000
+    },
+    {
+      "deleted": false,
+      "entity_id": "SME-B",
+      "event_at": "2026-02-10T00:00:00.000000+00:00",
+      "feature": "net_inflow",
+      "ingested_at": "2026-02-13T00:00:00.000000+00:00",
+      "published_at": "2026-02-12T00:00:00.000000+00:00",
+      "record_id": "cash-b-v2",
+      "revision": 2,
+      "source": "bank",
+      "value": 30000
+    },
+    {
+      "deleted": false,
+      "entity_id": "SME-A",
+      "event_at": "2026-02-01T00:00:00.000000+00:00",
+      "feature": "kwh",
+      "ingested_at": "2026-02-03T00:00:00.000000+00:00",
+      "published_at": "2026-02-02T00:00:00.000000+00:00",
+      "record_id": "power-a",
+      "revision": 1,
+      "source": "utility",
+      "value": 1800
+    },
+    {
+      "deleted": false,
+      "entity_id": "SME-B",
+      "event_at": "2026-02-01T00:00:00.000000+00:00",
+      "feature": "kwh",
+      "ingested_at": "2026-03-02T00:00:00.000000+00:00",
+      "published_at": "2026-02-03T00:00:00.000000+00:00",
+      "record_id": "power-b",
+      "revision": 1,
+      "source": "utility",
+      "value": 1300
+    },
+    {
+      "deleted": false,
+      "entity_id": "SME-B",
+      "event_at": "2025-11-01T00:00:00.000000+00:00",
+      "feature": "kwh",
+      "ingested_at": "2025-11-02T00:00:00.000000+00:00",
+      "published_at": "2025-11-02T00:00:00.000000+00:00",
+      "record_id": "power-b-old",
+      "revision": 1,
+      "source": "utility",
+      "value": 700
+    },
+    {
+      "deleted": false,
+      "entity_id": "SME-A",
+      "event_at": "2026-02-28T00:00:00.000000+00:00",
+      "feature": "invoice_revenue",
+      "ingested_at": "2026-03-20T00:00:00.000000+00:00",
+      "published_at": "2026-03-05T00:00:00.000000+00:00",
+      "record_id": "tax-a-feb",
+      "revision": 1,
+      "source": "tax",
+      "value": 220000
+    },
+    {
+      "deleted": false,
+      "entity_id": "SME-A",
+      "event_at": "2026-01-31T00:00:00.000000+00:00",
+      "feature": "invoice_revenue",
+      "ingested_at": "2026-02-06T00:00:00.000000+00:00",
+      "published_at": "2026-02-05T00:00:00.000000+00:00",
+      "record_id": "tax-a-v1",
+      "revision": 1,
+      "source": "tax",
+      "value": 100000
+    },
+    {
+      "deleted": false,
+      "entity_id": "SME-A",
+      "event_at": "2026-01-31T00:00:00.000000+00:00",
+      "feature": "invoice_revenue",
+      "ingested_at": "2026-03-11T00:00:00.000000+00:00",
+      "published_at": "2026-03-10T00:00:00.000000+00:00",
+      "record_id": "tax-a-v2",
+      "revision": 2,
+      "source": "tax",
+      "value": 180000
+    },
+    {
+      "deleted": false,
+      "entity_id": "SME-B",
+      "event_at": "2026-01-31T00:00:00.000000+00:00",
+      "feature": "invoice_revenue",
+      "ingested_at": "2026-03-01T00:00:00.000000+00:00",
+      "published_at": "2026-02-05T00:00:00.000000+00:00",
+      "record_id": "tax-b",
+      "revision": 1,
+      "source": "tax",
+      "value": 90000
+    }
+  ],
+  "specs": [
+    {
+      "feature": "net_inflow",
+      "max_age_days": 60,
+      "source": "bank"
+    },
+    {
+      "feature": "invoice_revenue",
+      "max_age_days": 90,
+      "source": "tax"
+    },
+    {
+      "feature": "kwh",
+      "max_age_days": 45,
+      "source": "utility"
+    }
+  ]
+}

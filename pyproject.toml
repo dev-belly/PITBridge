@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pitbridge"
+version = "0.1.0"
+description = "Availability-aware financial feature snapshots with revision lineage"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+dependencies = []
+
+[project.optional-dependencies]
+figures = ["matplotlib>=3.8,<4"]
+
+[project.scripts]
+pitbridge = "pitbridge.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

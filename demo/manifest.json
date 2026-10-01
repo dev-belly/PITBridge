@@ -1,0 +1,11 @@
+{
+  "engine": "pitbridge/0.1.0",
+  "files": {
+    "comparison.csv": "0eb458eceec7477682417da3bcfc24c1746021c52ad83b24c7a4a7e5fc4f734e",
+    "inputs.json": "d55c44483897bd3ed838376b3e7a11f7d56ee41ef5cf8e6e22c99d060d701a98",
+    "report.html": "39b0dbcc2bd7c13447127990d4cece668fdbc1e15a180c969100dac8fa6d0f4c",
+    "snapshots.csv": "777f54dea6c8067cccb9a9e5ec375038a99dd2e44c9ab1df52cfae029a31e6f0",
+    "summary.json": "fe3d30c39e8eb5244636e150f2da884e898456a1b5f52c2c42f0a65cf54e496b"
+  },
+  "schema_version": 1
+}
