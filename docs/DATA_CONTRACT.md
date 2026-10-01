@@ -43,3 +43,7 @@ At least one decision and one spec are required; observations may be empty. The 
 ```
 
 `snapshots.csv` exports the decision identity/time, source, feature, value, status, record ID, revision, event/publication/ingestion/availability times. Missing lineage fields are empty CSV cells. `inputs.json` retains the full normalized history, including revisions not chosen for a decision.
+
+## Spreadsheet-compatible exports
+
+Formula-shaped text fields and headers beginning with `=`, `+`, `-`, `@`, or control whitespace receive an apostrophe prefix in CSV exports. Numeric losses and negative numeric features keep their values. This affects the spreadsheet representation only: `inputs.json` retains original identifiers and is the authoritative source for replay. The verifier regenerates the same protected CSV representation.

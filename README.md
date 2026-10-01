@@ -1,9 +1,11 @@
+<img src="assets/hero.svg" width="100%" alt="PITBridge · data, method and replayable evidence" />
+
 # PITBridge
 
 **Financial features as they were known when a decision was made.**
 
 [![CI](https://github.com/dev-belly/PITBridge/actions/workflows/ci.yml/badge.svg)](https://github.com/dev-belly/PITBridge/actions/workflows/ci.yml)
-[中文说明](README.zh-CN.md) · [Methodology](docs/METHODOLOGY.md) · [Data contract](docs/DATA_CONTRACT.md) · [Interview notes](docs/INTERVIEW.md)
+[Open the online report](https://dev-belly.github.io/PITBridge/) · [中文说明](README.zh-CN.md) · [Methodology](docs/METHODOLOGY.md) · [Data contract](docs/DATA_CONTRACT.md) · [Interview notes](docs/INTERVIEW.md)
 
 An invoice dated January can be published in February, arrive in March, and be corrected later. Joining on January's date alone can put future knowledge into an earlier credit decision. PITBridge resolves **event time, publication time, ingestion time and observation revisions** before exporting a feature snapshot.
 
