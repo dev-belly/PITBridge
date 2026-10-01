@@ -1,0 +1,17 @@
+{
+  "data_kind": "synthetic",
+  "decisions": 15,
+  "different_selections": 16,
+  "future_knowledge_rows": 11,
+  "independent_replay": true,
+  "observations": 11,
+  "schema_version": 1,
+  "snapshot_rows": 45,
+  "status_counts": {
+    "deleted": 3,
+    "no_history": 17,
+    "not_available": 4,
+    "selected": 16,
+    "stale": 5
+  }
+}
