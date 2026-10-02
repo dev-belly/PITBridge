@@ -63,8 +63,25 @@ The production path is a SQLite window-function join. A separate Python enumerat
 
 Verification checks hashes **and** reruns both algorithms, rejecting a fabricated summary even if its hash was updated. Hashes are not signatures and cannot establish that an external source is truthful.
 
+## Availability-aware rolling features
+
+Rolling sums, observation means and counts resolve availability, revisions
+and tombstones before aggregating an inclusive event-time window. Every result
+retains all contributing records; a separate Python temporal enumerator checks
+membership and values.
+
+```bash
+pitbridge rolling-demo --out outputs/rolling
+pitbridge verify-rolling --out outputs/rolling
+pitbridge aggregate --inputs demo/rolling/inputs.json --out outputs/custom
+```
+
+[Online rolling case](https://dev-belly.github.io/PITBridge/rolling/) ·
+[Contract and worked example](docs/ROLLING.md) ·
+[Feature rows](demo/rolling/features.csv) · [Membership](demo/rolling/members.csv)
+
 ## Scope
 
-This is a reference implementation for scalar financial observations. It does not provide streaming ingestion, access control, label generation or aggregated rolling features. Version numbers and trustworthy availability timestamps must come from the upstream source contract. SQLite is intentionally inspectable; distributed-scale performance has not been benchmarked.
+This is a reference implementation for scalar financial observations and explicit rolling aggregates. It does not provide streaming ingestion, access control or label generation. Version numbers and trustworthy availability timestamps must come from the upstream source contract. SQLite is intentionally inspectable; distributed-scale performance has not been benchmarked. Rolling means are observation means, and counts do not establish complete business activity.
 
 PITBridge complements [CreditVintage](https://github.com/dev-belly/CreditVintage)'s application-time model evaluation. The repositories are separate components; no integration is claimed. MIT license.
