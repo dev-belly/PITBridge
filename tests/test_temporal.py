@@ -19,6 +19,20 @@ def snapshot(records, at="2026-01-05T00:00:00Z", age=None, entity="A"):
 
 
 class TemporalTests(unittest.TestCase):
+    def test_large_integer_values_use_binary64_in_both_engines(self):
+        for value in (10**20, -(10**20), 10**308):
+            with self.subTest(value=value):
+                rows = [observation(value=value)]
+                decisions = [Decision("D", "A", "2026-01-05T00:00:00Z")]
+                specs = [FeatureSpec("tax", "revenue")]
+                actual = build_snapshot(rows, decisions, specs)
+                self.assertEqual(actual, reference_snapshot(rows, decisions, specs))
+                self.assertEqual(actual[0].value, float(value))
+
+    def test_integer_outside_binary64_range_is_a_contract_error(self):
+        with self.assertRaisesRegex(ValueError, "finite"):
+            observation(value=10**400)
+
     def test_historical_revision_cannot_change_old_decision(self):
         revision = observation(record_id="r2", revision=2, value=90, published_at="2026-01-10T00:00:00Z", ingested_at="2026-01-10T00:00:00Z")
         self.assertEqual(snapshot([observation(), revision]).value, 10)

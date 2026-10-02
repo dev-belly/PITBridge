@@ -49,8 +49,15 @@ class Observation:
         if self.deleted:
             if self.value is not None:
                 raise ValueError("a tombstone must have value=null")
-        elif isinstance(self.value, bool) or not isinstance(self.value, (int, float)) or not math.isfinite(self.value):
-            raise ValueError("active observations require a finite numeric value")
+        else:
+            if isinstance(self.value, bool) or not isinstance(self.value, (int, float)):
+                raise ValueError("active observations require a finite numeric value")
+            try:
+                finite = math.isfinite(float(self.value))
+            except OverflowError:
+                finite = False
+            if not finite:
+                raise ValueError("active observations require a finite binary64 numeric value")
         if self.published_at < self.event_at or self.ingested_at < self.event_at:
             raise ValueError("publication and ingestion cannot precede the observation event")
 
@@ -122,6 +129,14 @@ def _instant(value: str) -> int:
     return (delta.days * 86400 + delta.seconds) * 1_000_000 + delta.microseconds
 
 
+def _sql_observation(row: Observation) -> tuple:
+    fields = asdict(row)
+    # Python integers bind as SQLite INTEGER even when the column is REAL.
+    # Match the reference engine's binary64 value contract explicitly.
+    fields["value"] = None if row.deleted else float(row.value)
+    return tuple(fields.values()) + (row.available_at, _instant(row.event_at), _instant(row.available_at))
+
+
 SQL = """
 WITH eligible AS (
   SELECT d.decision_id, o.*,
@@ -179,7 +194,7 @@ def build_snapshot(observations, decisions, specs) -> list[Snapshot]:
         CREATE TABLE specs(source TEXT,feature TEXT,max_age_us INTEGER);
         CREATE INDEX temporal_lookup ON observations(entity_id,source,feature,event_us,available_us);
         """)
-        db.executemany("INSERT INTO observations VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", [tuple(asdict(r).values()) + (r.available_at, _instant(r.event_at), _instant(r.available_at)) for r in obs])
+        db.executemany("INSERT INTO observations VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", [_sql_observation(r) for r in obs])
         db.executemany("INSERT INTO decisions VALUES (?,?,?,?)", [(r.decision_id, r.entity_id, r.decision_at, _instant(r.decision_at)) for r in dec])
         db.executemany("INSERT INTO specs VALUES (?,?,?)", [(r.source, r.feature, None if r.max_age_days is None else round(r.max_age_days * 86400 * 1e6)) for r in features])
         return [Snapshot(*row) for row in db.execute(SQL)]

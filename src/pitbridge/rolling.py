@@ -1,10 +1,11 @@
 """Availability-aware rolling aggregates with every contributing revision retained."""
 
 from dataclasses import asdict, dataclass
+from fractions import Fraction
 import math
 import sqlite3
 
-from .core import Decision, FeatureSpec, Observation, _identifier, _instant, validate
+from .core import Decision, FeatureSpec, Observation, _identifier, _instant, _sql_observation, validate
 
 
 @dataclass(frozen=True)
@@ -71,8 +72,26 @@ def validate_rolling(observations, decisions, specs):
     return observations, decisions, sorted(specs, key=lambda spec: spec.name)
 
 
+def _aggregate(values, *, mean=False):
+    try:
+        value = math.fsum(values)
+    except OverflowError:
+        # The partial sum can overflow even when the final sum or mean fits.
+        # Exact ratios of the binary64 inputs are a rare, bounded fallback;
+        # this does not turn upstream decimal amounts into exact accounting.
+        exact = sum((Fraction.from_float(value) for value in values), Fraction())
+        if mean:
+            exact /= len(values)
+        try:
+            return float(exact)
+        except OverflowError as error:
+            raise ValueError("rolling aggregate is outside the finite binary64 range") from error
+    return value / len(values) if mean else value
+
+
 class _PreciseSum:
     """Compensated binary64 summation; this is not exact decimal accounting."""
+    mean = False
     def __init__(self):
         self.values = []
 
@@ -82,9 +101,13 @@ class _PreciseSum:
 
     def finalize(self):
         try:
-            return math.fsum(self.values) if self.values else None
-        except OverflowError:
+            return _aggregate(self.values, mean=self.mean) if self.values else None
+        except ValueError:
             return math.inf  # Rejected by the finite-output check below.
+
+
+class _PreciseMean(_PreciseSum):
+    mean = True
 
 
 CTE = """
@@ -111,6 +134,7 @@ def build_rolling(observations, decisions, specs):
     observations, decisions, specs = validate_rolling(observations, decisions, specs)
     with sqlite3.connect(":memory:") as db:
         db.create_aggregate("precise_sum", 1, _PreciseSum)
+        db.create_aggregate("precise_mean", 1, _PreciseMean)
         db.executescript("""
         CREATE TABLE observations(record_id TEXT,entity_id TEXT,source TEXT,feature TEXT,
           event_at TEXT,published_at TEXT,ingested_at TEXT,revision INTEGER,value REAL,
@@ -121,7 +145,7 @@ def build_rolling(observations, decisions, specs):
         CREATE INDEX temporal_lookup ON observations(entity_id,source,feature,event_us,available_us);
         """)
         db.executemany("INSERT INTO observations VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", [
-            tuple(asdict(row).values()) + (row.available_at, _instant(row.event_at), _instant(row.available_at))
+            _sql_observation(row)
             for row in observations
         ])
         db.executemany("INSERT INTO decisions VALUES (?,?,?,?)", [
@@ -136,8 +160,8 @@ def build_rolling(observations, decisions, specs):
           s.window_days,s.aggregation,
           CASE WHEN count(a.record_id)=0 THEN NULL
             WHEN s.aggregation='count' THEN count(a.record_id)
-            WHEN s.aggregation='sum' THEN precise_sum(CASE WHEN s.aggregation='count' THEN NULL ELSE a.value END)
-            ELSE precise_sum(CASE WHEN s.aggregation='count' THEN NULL ELSE a.value END)/count(a.record_id) END,
+            WHEN s.aggregation='sum' THEN precise_sum(CASE WHEN s.aggregation='sum' THEN a.value END)
+            ELSE precise_mean(CASE WHEN s.aggregation='mean' THEN a.value END) END,
           count(a.record_id),
           CASE WHEN count(a.record_id)>0 THEN 'selected'
             WHEN NOT EXISTS (SELECT 1 FROM observations o
@@ -188,12 +212,7 @@ def reference_rolling(observations, decisions, specs):
                 if spec.aggregation == "count":
                     value = len(active)
                 else:
-                    try:
-                        value = math.fsum(float(row.value) for row in active)
-                    except OverflowError as error:
-                        raise ValueError("rolling aggregate is outside the finite binary64 range") from error
-                    if spec.aggregation == "mean":
-                        value /= len(active)
+                    value = _aggregate([float(row.value) for row in active], mean=spec.aggregation == "mean")
             features.append(RollingFeature(decision.decision_id, decision.entity_id,
                 decision.decision_at, spec.name, spec.source, spec.feature, spec.window_days,
                 spec.aggregation, value, len(active), status))

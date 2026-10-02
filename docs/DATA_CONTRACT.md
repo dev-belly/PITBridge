@@ -12,10 +12,10 @@ The JSON root requires `observations`, `decisions` and `specs` arrays. Optional 
 | `published_at` | Timezone-aware instant, no earlier than event time. |
 | `ingested_at` | Timezone-aware instant, no earlier than event time. |
 | `revision` | Integer in `[1, 2^63-1]`; booleans are rejected. |
-| `value` | Finite number for an active record; null for a tombstone. |
+| `value` | Number representable as finite binary64 for an active record; null for a tombstone. Integers are converted to binary64 for computation, including values outside SQLite's signed-int64 range. |
 | `deleted` | Boolean, default false. |
 
-The logical version key `(entity_id, source, feature, event_at, revision)` must also be unique. Value units are governed upstream: the demo uses CNY for invoice revenue and bank net inflow, kWh for utility consumption. Unit conversion and numeric aggregation are outside this implementation.
+The logical version key `(entity_id, source, feature, event_at, revision)` must also be unique. Value units are governed upstream: the demo uses CNY for invoice revenue and bank net inflow, kWh for utility consumption. Binary64 conversion can round integers above `2^53`; original input values remain in `inputs.json`. This is a feature engine, not an exact monetary ledger. Unit conversion is outside scope; [rolling aggregates](ROLLING.md) have a separate contract.
 
 ## Decisions and specs
 

@@ -37,11 +37,15 @@ window durations are rounded to microseconds. Both boundaries are inclusive:
 4. Aggregate active observations in the window, exporting their identities,
    revisions and availability timestamps in `members.csv`.
 
-The SQLite temporal join uses a custom `math.fsum` aggregate. A separate
+The SQLite temporal join uses custom compensated sum and mean aggregates. A separate
 Python enumerator independently selects contributors. These paths share
 compensated binary64 arithmetic, not their temporal selection logic.
 This reduces cancellation error but is not exact decimal accounting;
-non-finite outputs are rejected. Ordinary floating-point summation can
+non-finite outputs are rejected. If `math.fsum` overflows while accumulating,
+an exact rational sum of the already-converted binary64 inputs checks the final
+sum or mean. Thus two `1e308` observations have a valid mean of `1e308`,
+although their sum is rejected. This fallback also preserves finite sums after
+large cancellation. Ordinary floating-point summation can
 lose small terms when large values cancel; see the
 [SQLite aggregate documentation](https://www.sqlite.org/lang_aggfunc.html).
 

@@ -26,6 +26,35 @@ def spec(name="cash_30d", days=30, aggregation="sum"):
 
 
 class RollingTests(unittest.TestCase):
+    def test_large_integer_values_match_the_temporal_oracle(self):
+        rows = [observation("large", "2026-01-01T00:00:00Z", 10**20)]
+        data = (rows, [Decision("D", "A", "2026-01-03T00:00:00Z")],
+                [spec("sum"), spec("mean", aggregation="mean"), spec("count", aggregation="count")])
+        actual = build_rolling(*data)
+        self.assertEqual(actual, reference_rolling(*data))
+        self.assertEqual({row.name: row.value for row in actual[0]},
+                         {"sum": 1e20, "mean": 1e20, "count": 1})
+
+    def test_finite_mean_survives_unrepresentable_intermediate_sum(self):
+        for value in (1e308, -1e308):
+            rows = [observation(str(i), f"2026-01-0{i+1}T00:00:00Z", value) for i in range(2)]
+            data = (rows, [Decision("D", "A", "2026-01-04T00:00:00Z")],
+                    [spec(aggregation="mean")])
+            with self.subTest(value=value):
+                actual = build_rolling(*data)
+                self.assertEqual(actual[0][0].value, value)
+                self.assertEqual(actual, reference_rolling(*data))
+
+    def test_finite_sum_survives_intermediate_overflow_and_cancellation(self):
+        for values in ((1e308, 1e308, -1e308), (-1e308, 1e308, 1e308)):
+            rows = [observation(str(i), f"2026-01-0{i+1}T00:00:00Z", value)
+                    for i, value in enumerate(values)]
+            data = (rows, [Decision("D", "A", "2026-01-04T00:00:00Z")], [spec()])
+            with self.subTest(values=values):
+                actual = build_rolling(*data)
+                self.assertEqual(actual[0][0].value, 1e308)
+                self.assertEqual(actual, reference_rolling(*data))
+
     def test_hand_auditable_demo_sums_and_members(self):
         data = decode_rolling(rolling_demo_inputs())
         features, members = build_rolling(*data)
