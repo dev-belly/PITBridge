@@ -1,0 +1,170 @@
+{
+  "data_kind": "synthetic",
+  "decisions": [
+    {
+      "decision_at": "2026-02-10T18:00:00.000000+00:00",
+      "decision_id": "SME-A-10",
+      "entity_id": "SME-A"
+    },
+    {
+      "decision_at": "2026-02-11T18:00:00.000000+00:00",
+      "decision_id": "SME-A-11",
+      "entity_id": "SME-A"
+    },
+    {
+      "decision_at": "2026-02-12T18:00:00.000000+00:00",
+      "decision_id": "SME-A-12",
+      "entity_id": "SME-A"
+    },
+    {
+      "decision_at": "2026-02-12T18:00:00.000000+00:00",
+      "decision_id": "SME-B-12",
+      "entity_id": "SME-B"
+    }
+  ],
+  "observations": [
+    {
+      "deleted": false,
+      "entity_id": "SME-A",
+      "event_at": "2026-01-11T18:00:00.000000+00:00",
+      "feature": "net_inflow",
+      "ingested_at": "2026-01-11T18:00:00.000000+00:00",
+      "published_at": "2026-01-11T18:00:00.000000+00:00",
+      "record_id": "boundary",
+      "revision": 1,
+      "source": "bank",
+      "value": 200
+    },
+    {
+      "deleted": false,
+      "entity_id": "SME-A",
+      "event_at": "2026-02-07T00:00:00.000000+00:00",
+      "feature": "net_inflow",
+      "ingested_at": "2026-02-07T00:00:00.000000+00:00",
+      "published_at": "2026-02-07T00:00:00.000000+00:00",
+      "record_id": "cancel-v1",
+      "revision": 1,
+      "source": "bank",
+      "value": 800
+    },
+    {
+      "deleted": true,
+      "entity_id": "SME-A",
+      "event_at": "2026-02-07T00:00:00.000000+00:00",
+      "feature": "net_inflow",
+      "ingested_at": "2026-02-09T00:00:00.000000+00:00",
+      "published_at": "2026-02-09T00:00:00.000000+00:00",
+      "record_id": "cancel-v2",
+      "revision": 2,
+      "source": "bank",
+      "value": null
+    },
+    {
+      "deleted": false,
+      "entity_id": "SME-A",
+      "event_at": "2026-02-01T00:00:00.000000+00:00",
+      "feature": "net_inflow",
+      "ingested_at": "2026-02-01T00:00:00.000000+00:00",
+      "published_at": "2026-02-01T00:00:00.000000+00:00",
+      "record_id": "cash-v1",
+      "revision": 1,
+      "source": "bank",
+      "value": 1000
+    },
+    {
+      "deleted": false,
+      "entity_id": "SME-A",
+      "event_at": "2026-02-01T00:00:00.000000+00:00",
+      "feature": "net_inflow",
+      "ingested_at": "2026-02-11T00:00:00.000000+00:00",
+      "published_at": "2026-02-11T00:00:00.000000+00:00",
+      "record_id": "cash-v2",
+      "revision": 2,
+      "source": "bank",
+      "value": 4000
+    },
+    {
+      "deleted": false,
+      "entity_id": "SME-A",
+      "event_at": "2026-02-14T00:00:00.000000+00:00",
+      "feature": "net_inflow",
+      "ingested_at": "2026-02-14T00:00:00.000000+00:00",
+      "published_at": "2026-02-14T00:00:00.000000+00:00",
+      "record_id": "future-event",
+      "revision": 1,
+      "source": "bank",
+      "value": 300
+    },
+    {
+      "deleted": false,
+      "entity_id": "SME-A",
+      "event_at": "2026-02-09T00:00:00.000000+00:00",
+      "feature": "net_inflow",
+      "ingested_at": "2026-02-12T00:00:00.000000+00:00",
+      "published_at": "2026-02-12T00:00:00.000000+00:00",
+      "record_id": "late",
+      "revision": 1,
+      "source": "bank",
+      "value": 2000
+    },
+    {
+      "deleted": false,
+      "entity_id": "SME-A",
+      "event_at": "2026-01-11T17:59:59.000000+00:00",
+      "feature": "net_inflow",
+      "ingested_at": "2026-01-11T17:59:59.000000+00:00",
+      "published_at": "2026-01-11T17:59:59.000000+00:00",
+      "record_id": "outside",
+      "revision": 1,
+      "source": "bank",
+      "value": 10000
+    },
+    {
+      "deleted": false,
+      "entity_id": "SME-A",
+      "event_at": "2026-02-08T00:00:00.000000+00:00",
+      "feature": "net_inflow",
+      "ingested_at": "2026-02-09T00:00:00.000000+00:00",
+      "published_at": "2026-02-09T00:00:00.000000+00:00",
+      "record_id": "recent",
+      "revision": 1,
+      "source": "bank",
+      "value": 500
+    },
+    {
+      "deleted": false,
+      "entity_id": "SME-A",
+      "event_at": "2026-02-05T00:00:00.000000+00:00",
+      "feature": "net_inflow",
+      "ingested_at": "2026-02-05T00:00:00.000000+00:00",
+      "published_at": "2026-02-05T00:00:00.000000+00:00",
+      "record_id": "refund",
+      "revision": 1,
+      "source": "bank",
+      "value": -200
+    }
+  ],
+  "rolling_specs": [
+    {
+      "aggregation": "mean",
+      "feature": "net_inflow",
+      "name": "mean_inflow_7d",
+      "source": "bank",
+      "window_days": 7
+    },
+    {
+      "aggregation": "sum",
+      "feature": "net_inflow",
+      "name": "net_inflow_30d",
+      "source": "bank",
+      "window_days": 30
+    },
+    {
+      "aggregation": "count",
+      "feature": "net_inflow",
+      "name": "observations_30d",
+      "source": "bank",
+      "window_days": 30
+    }
+  ]
+}

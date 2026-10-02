@@ -1,0 +1,14 @@
+{
+  "data_kind": "synthetic",
+  "decisions": 4,
+  "feature_rows": 12,
+  "independent_temporal_replay": true,
+  "member_rows": 28,
+  "observations": 10,
+  "schema_version": 1,
+  "status_counts": {
+    "no_history": 3,
+    "selected": 9
+  },
+  "window_boundaries": "inclusive"
+}

@@ -1,0 +1,11 @@
+{
+  "engine": "pitbridge/rolling/1",
+  "files": {
+    "features.csv": "62cbc8dfbd1cfa7567346341aa47b9067039186bd5a6a39d1e0f3f7771ad2695",
+    "inputs.json": "67480d63496734095c73eca104ddbf3843028be98238637b90facf8ee7859886",
+    "members.csv": "a5ebb522cc58139169d1655a02d6753a3f49f81f11517656c5152ebfa0251aa1",
+    "report.html": "8b7aa6e303fa6dbcceae3d630beb42d152673b2cf74aa1eca107099e7912316f",
+    "summary.json": "a2a15decb3ac74604c8a13dd1f1452695c35bfbab982d7c87ca234ba12fc8b1b"
+  },
+  "schema_version": 1
+}

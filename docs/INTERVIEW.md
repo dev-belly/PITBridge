@@ -28,4 +28,6 @@
 
 ## 建议展示路径
 
+升级展示：打开 [滚动特征报告](https://dev-belly.github.io/PITBridge/rolling/)，说明 30 天现金流从 1,500 到 4,300 再到 6,300 的变化如何同时受迟到、更正与窗口移动影响；在 `demo/rolling/members.csv` 逐条追溯。完整口径与追问见 [ROLLING.md](ROLLING.md)。
+
 先打开 `demo/comparison.csv` 看 `SME-A-2 / tax` 的未来修订；再打开 `demo/snapshots.csv` 看选中的 `tax-a-v1`；最后展示 `test_historical_revision_cannot_change_old_decision` 和 `test_rehashed_false_metric_still_fails_semantic_replay`。

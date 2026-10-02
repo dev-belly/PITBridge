@@ -23,8 +23,12 @@ jobs:
       - name: Counterexamples and contracts
         run: python -m unittest discover -s tests -v
       - name: Replay committed evidence
-        run: pitbridge verify --out demo
+        run: |
+          pitbridge verify --out demo
+          pitbridge verify-rolling --out demo/rolling
       - name: Generate and replay a fresh report
         run: |
           pitbridge demo --out outputs
           pitbridge verify --out outputs
+          pitbridge rolling-demo --out outputs/rolling
+          pitbridge verify-rolling --out outputs/rolling

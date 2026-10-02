@@ -27,6 +27,14 @@ python -m unittest discover -s tests -v
 - **显式缺失：** 区分没有历史、尚未可用、已撤销和已过期，保留申请行。
 - **逐条溯源：** 导出来源、记录 ID、版本、发生时间、公开时间与入库时间。
 - **可重放证据：** 修改报告并更新哈希，仍会被语义重放发现。
+- **时点滚动统计：** 在选择当时已知版本后，计算指定窗口的加总、观察均值和计数，并保留每条贡献记录；SQL 与 Python 分别重放成员与数值。
+
+[在线滚动特征案例](https://dev-belly.github.io/PITBridge/rolling/) · [窗口合同与手算案例](docs/ROLLING.md)
+
+```bash
+pitbridge rolling-demo --out outputs/rolling
+pitbridge verify-rolling --out outputs/rolling
+```
 
 合成示例有 11 条源记录、15 次决策、45 次特征查询。错误的“只按发生时间关联”基线有 11 次使用未来信息；完整规则共改变 16 次选择。后者还包括撤销和过期影响，不能把两个数字混为一谈。
 

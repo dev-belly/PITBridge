@@ -1,0 +1,13 @@
+decision_id,entity_id,decision_at,name,source,feature,window_days,aggregation,value,observation_count,status
+SME-A-10,SME-A,2026-02-10T18:00:00.000000+00:00,mean_inflow_7d,bank,net_inflow,7.0,mean,150.0,2,selected
+SME-A-10,SME-A,2026-02-10T18:00:00.000000+00:00,net_inflow_30d,bank,net_inflow,30.0,sum,1500.0,4,selected
+SME-A-10,SME-A,2026-02-10T18:00:00.000000+00:00,observations_30d,bank,net_inflow,30.0,count,4,4,selected
+SME-A-11,SME-A,2026-02-11T18:00:00.000000+00:00,mean_inflow_7d,bank,net_inflow,7.0,mean,150.0,2,selected
+SME-A-11,SME-A,2026-02-11T18:00:00.000000+00:00,net_inflow_30d,bank,net_inflow,30.0,sum,4300.0,3,selected
+SME-A-11,SME-A,2026-02-11T18:00:00.000000+00:00,observations_30d,bank,net_inflow,30.0,count,3,3,selected
+SME-A-12,SME-A,2026-02-12T18:00:00.000000+00:00,mean_inflow_7d,bank,net_inflow,7.0,mean,1250.0,2,selected
+SME-A-12,SME-A,2026-02-12T18:00:00.000000+00:00,net_inflow_30d,bank,net_inflow,30.0,sum,6300.0,4,selected
+SME-A-12,SME-A,2026-02-12T18:00:00.000000+00:00,observations_30d,bank,net_inflow,30.0,count,4,4,selected
+SME-B-12,SME-B,2026-02-12T18:00:00.000000+00:00,mean_inflow_7d,bank,net_inflow,7.0,mean,,0,no_history
+SME-B-12,SME-B,2026-02-12T18:00:00.000000+00:00,net_inflow_30d,bank,net_inflow,30.0,sum,,0,no_history
+SME-B-12,SME-B,2026-02-12T18:00:00.000000+00:00,observations_30d,bank,net_inflow,30.0,count,,0,no_history
