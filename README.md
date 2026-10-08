@@ -13,21 +13,59 @@ An invoice dated January can be published in February, arrive in March, and be c
 
 ## Run in one minute
 
+Python 3.11+ and Git are required. There are **no third-party runtime
+dependencies**. The commands use a virtual environment without requiring
+activation.
+
+**Linux / macOS**
+
 ```bash
 git clone https://github.com/dev-belly/PITBridge.git
 cd PITBridge
-python -m pip install -e .
-pitbridge demo --out outputs
-pitbridge verify --out outputs
-python -m unittest discover -s tests -v
+python3 -m venv .venv
+.venv/bin/python -m pip install -e .
+.venv/bin/python -m pitbridge demo --out outputs
+.venv/bin/python -m pitbridge verify --out outputs
+.venv/bin/python examples/decision_time.py
 ```
 
-Open `outputs/report.html` in a browser. The report is self-contained, works offline and includes a filter for changed selections. Python 3.11+; **no third-party runtime dependencies**.
+**Windows (PowerShell)**
+
+```powershell
+git clone https://github.com/dev-belly/PITBridge.git
+cd PITBridge
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -e .
+.\.venv\Scripts\python.exe -m pitbridge demo --out outputs
+.\.venv\Scripts\python.exe -m pitbridge verify --out outputs
+.\.venv\Scripts\python.exe examples/decision_time.py
+```
+
+Open `outputs/report.html` in a browser. The report is self-contained, works
+offline and includes a filter for changed selections. Later command snippets
+use `.venv/bin/python`; on Windows substitute `.\.venv\Scripts\python.exe`.
 
 ```bash
 # Bring your own observations, decisions and feature specs:
-pitbridge build --inputs demo/inputs.json --out outputs
+.venv/bin/python -m pitbridge build --inputs demo/inputs.json --out outputs
 ```
+
+## Use the Python API
+
+The [runnable example](examples/decision_time.py) calls `build_snapshot` with
+your observations, decisions and feature specs and checks the result against
+`reference_snapshot`. It contains two versions of a synthetic invoice: the
+original is available on February 6, while its correction arrives on April 3.
+
+| Decision (UTC) | Synthetic invoice revenue (CNY) | Selected record |
+| :--- | ---: | :--- |
+| February 1 | missing (`not_available`) | none |
+| February 15 | 100,000 | `invoice-v1` |
+| April 15 | 135,000 | `invoice-v2` |
+
+The January event date is the same for both versions. The April correction
+cannot become a February feature. [See the input lists and full output](examples/README.md)
+to adapt the example to your own data.
 
 ## What the saved example proves
 
@@ -71,9 +109,9 @@ retains all contributing records; a separate Python temporal enumerator checks
 membership and values.
 
 ```bash
-pitbridge rolling-demo --out outputs/rolling
-pitbridge verify-rolling --out outputs/rolling
-pitbridge aggregate --inputs demo/rolling/inputs.json --out outputs/custom
+.venv/bin/python -m pitbridge rolling-demo --out outputs/rolling
+.venv/bin/python -m pitbridge verify-rolling --out outputs/rolling
+.venv/bin/python -m pitbridge aggregate --inputs demo/rolling/inputs.json --out outputs/custom
 ```
 
 [Online rolling case](https://dev-belly.github.io/PITBridge/rolling/) ·
@@ -110,3 +148,13 @@ This is a reference implementation for scalar financial observations and explici
 
 PITBridge remains independently usable, while CreditVintage provides a
 published, CI-verified downstream source-to-prediction integration. MIT license.
+
+## Feedback and contributions
+
+Found an unexpected selection or an installation problem?
+[Open an issue with a small reproduction](https://github.com/dev-belly/PITBridge/issues/new/choose).
+The [contribution guide](CONTRIBUTING.md) maps the code and regression cases and
+explains how to replay evidence. Small counterexamples, optional adapter
+examples and documentation improvements are welcome.
+
+If this workflow is useful to you, a star is a simple way to keep the repository handy.

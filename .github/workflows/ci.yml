@@ -22,6 +22,8 @@ jobs:
           python -m pip install -e .
       - name: Counterexamples and contracts
         run: python -m unittest discover -s tests -v
+      - name: Run the Python library example
+        run: python examples/decision_time.py
       - name: Replay committed evidence
         run: |
           pitbridge verify --out demo
@@ -32,3 +34,27 @@ jobs:
           pitbridge verify --out outputs
           pitbridge rolling-demo --out outputs/rolling
           pitbridge verify-rolling --out outputs/rolling
+  windows-quickstart:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run installation and examples in a fresh environment
+        shell: pwsh
+        run: |
+          python -m venv .venv
+          .\.venv\Scripts\python.exe -m pip install -e .
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          .\.venv\Scripts\python.exe examples/decision_time.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          .\.venv\Scripts\python.exe -m pitbridge demo --out outputs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          .\.venv\Scripts\python.exe -m pitbridge verify --out outputs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          .\.venv\Scripts\python.exe -m pitbridge rolling-demo --out outputs/rolling
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          .\.venv\Scripts\python.exe -m pitbridge verify-rolling --out outputs/rolling
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
