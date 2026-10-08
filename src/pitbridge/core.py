@@ -87,7 +87,8 @@ class FeatureSpec:
     def __post_init__(self):
         for name in ("source", "feature"):
             _identifier(getattr(self, name), name)
-        if self.max_age_days is not None and (isinstance(self.max_age_days, bool) or not isinstance(self.max_age_days, (int, float)) or not math.isfinite(self.max_age_days) or not 0 <= self.max_age_days <= 3652500):
+        # Bound integer inputs before isfinite attempts a binary64 conversion.
+        if self.max_age_days is not None and (isinstance(self.max_age_days, bool) or not isinstance(self.max_age_days, (int, float)) or not 0 <= self.max_age_days <= 3652500 or not math.isfinite(self.max_age_days)):
             raise ValueError("max_age_days must be within [0, 3652500], or null")
 
 

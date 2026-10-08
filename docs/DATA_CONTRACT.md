@@ -26,6 +26,8 @@ The logical version key `(entity_id, source, feature, event_at, revision)` must 
 
 At least one decision and one spec are required; observations may be empty. The snapshot has exactly `len(decisions) * len(specs)` rows and a stable decision/source/feature order.
 
+Day limits must be numbers, with booleans rejected. Out-of-range limits, including arbitrarily large positive or negative integers, raise a validation error. The `build` and `aggregate` commands return status 2 with the invalid parameter named, without publishing an evidence manifest.
+
 ## Example
 
 ```json

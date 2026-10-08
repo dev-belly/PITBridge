@@ -27,8 +27,10 @@ Inputs contain `observations`, `decisions`, `rolling_specs` and optional
  "window_days":30,"aggregation":"sum"}
 ```
 
-Output names are unique. Aggregation is `sum`, `mean` or `count`. Positive
-window durations are rounded to microseconds. Both boundaries are inclusive:
+Output names are unique. Aggregation is `sum`, `mean` or `count`. Numeric
+window durations must be in `(0, 3652500]` days and round to at least one
+microsecond; booleans and out-of-range integers are rejected as input errors.
+Both boundaries are inclusive:
 `decision_at - window <= event_at <= decision_at`.
 
 1. Require event time and `max(published_at, ingested_at)` not later than the decision.
