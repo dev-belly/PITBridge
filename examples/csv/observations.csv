@@ -1,0 +1,3 @@
+record_id,entity_id,source,feature,event_at,published_at,ingested_at,revision,value,deleted
+invoice-v1,SME-001,tax,invoice_revenue,2026-01-31T00:00:00Z,2026-02-05T00:00:00Z,2026-02-06T00:00:00Z,1,100000,false
+invoice-v2,SME-001,tax,invoice_revenue,2026-01-31T00:00:00Z,2026-04-01T00:00:00Z,2026-04-03T00:00:00Z,2,135000,false
