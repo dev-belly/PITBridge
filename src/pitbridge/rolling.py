@@ -19,10 +19,11 @@ class RollingSpec:
     def __post_init__(self):
         for field in ("name", "source", "feature"):
             _identifier(getattr(self, field), field)
+        # Bound integer inputs before isfinite attempts a binary64 conversion.
         if (isinstance(self.window_days, bool) or not isinstance(self.window_days, (int, float))
-                or not math.isfinite(self.window_days) or not 0 < self.window_days <= 3652500
+                or not 0 < self.window_days <= 3652500 or not math.isfinite(self.window_days)
                 or self.window_us < 1):
-            raise ValueError("window_days must be positive and resolve to at least one microsecond")
+            raise ValueError("window_days must be within (0, 3652500] and resolve to at least one microsecond")
         if self.aggregation not in ("sum", "mean", "count"):
             raise ValueError("aggregation must be sum, mean or count")
 
