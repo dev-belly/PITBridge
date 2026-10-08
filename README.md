@@ -80,8 +80,33 @@ pitbridge aggregate --inputs demo/rolling/inputs.json --out outputs/custom
 [Contract and worked example](docs/ROLLING.md) ·
 [Feature rows](demo/rolling/features.csv) · [Membership](demo/rolling/members.csv)
 
+## Verified downstream integration
+
+PITBridge is also exercised by a real downstream adapter in
+[CreditVintage](https://github.com/dev-belly/CreditVintage). The published
+[PITBridge × CreditVintage explorer](https://dev-belly.github.io/CreditVintage/lineage/)
+traces each held-out model feature back to the selected PITBridge source record,
+revision, publication time, ingestion time and decision cutoff. The downloadable
+[evidence bundle](https://dev-belly.github.io/CreditVintage/lineage/evidence.zip)
+contains the source events, exported model inputs, predictions and manifests.
+
+The default synthetic integration contains **480 applications, 1,440 selected
+features and 120 held-out predictions**. Its source fixture includes **192
+observations that were not yet available at their decision time**, so the
+adapter has to preserve PITBridge's availability contract instead of performing
+a plain event-date join. CreditVintage currently pins PITBridge commit
+`ed19dc698534f45a2b646fb4976ff6b01966b0cc`; its CI verifies the PITBridge
+bundle with both the SQL engine and independent Python oracle before rebuilding
+the downstream model evidence.
+
+This is a downstream integration, not a claim that the two repositories form a
+production banking platform. The full adapter contract, units, UTC convention
+and replay boundaries live in
+[CreditVintage's lineage documentation](https://github.com/dev-belly/CreditVintage/blob/main/docs/LINEAGE.md).
+
 ## Scope
 
 This is a reference implementation for scalar financial observations and explicit rolling aggregates. It does not provide streaming ingestion, access control or label generation. Version numbers and trustworthy availability timestamps must come from the upstream source contract. SQLite is intentionally inspectable; distributed-scale performance has not been benchmarked. Rolling means are observation means, and counts do not establish complete business activity.
 
-PITBridge complements [CreditVintage](https://github.com/dev-belly/CreditVintage)'s application-time model evaluation. The repositories are separate components; no integration is claimed. MIT license.
+PITBridge remains independently usable, while CreditVintage provides a
+published, CI-verified downstream source-to-prediction integration. MIT license.

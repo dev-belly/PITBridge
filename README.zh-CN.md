@@ -38,6 +38,25 @@ pitbridge verify-rolling --out outputs/rolling
 
 合成示例有 11 条源记录、15 次决策、45 次特征查询。错误的“只按发生时间关联”基线有 11 次使用未来信息；完整规则共改变 16 次选择。后者还包括撤销和过期影响，不能把两个数字混为一谈。
 
+## 已验证的下游集成
+
+PITBridge 现在不仅是独立演示组件，也被
+[CreditVintage](https://github.com/dev-belly/CreditVintage) 的真实适配器代码路径调用。
+公开的 [PITBridge × CreditVintage 溯源页面](https://dev-belly.github.io/CreditVintage/lineage/)
+可以从留出集预测一路追到每个模型特征对应的源记录、修订版本、公开时间、入库时间和决策截止时点；
+[完整证据包](https://dev-belly.github.io/CreditVintage/lineage/evidence.zip)
+同时包含源事件、导出的模型输入、预测结果和 manifest。
+
+默认合成集成案例包含 **480 个申请、1,440 个已选择特征和 120 个留出集预测**，
+其中源数据里有 **192 条记录在对应决策时点尚不可用**。因此下游不能只按业务发生日期直接关联，
+而必须保留 PITBridge 的可用性和版本规则。CreditVintage 当前固定使用 PITBridge
+`ed19dc698534f45a2b646fb4976ff6b01966b0cc`，CI 会先用 SQL 引擎和独立 Python oracle
+重放 PITBridge 证据，再重建后续模型证据。
+
+这证明的是一条可重放的“源数据 → 时点特征 → 模型输入 → 预测”研究链路，不代表真实银行生产系统。
+完整单位、UTC 约定和适配边界见
+[CreditVintage 的 LINEAGE 文档](https://github.com/dev-belly/CreditVintage/blob/main/docs/LINEAGE.md)。
+
 [方法与规则](docs/METHODOLOGY.md) · [输入字段](docs/DATA_CONTRACT.md) · [中文面试问答及简历表述](docs/INTERVIEW.md)
 
 这是可以核验的金融数据工程研究组件。演示数据全部为合成；没有宣称接入真实银行、降低实际违约率或处理生产规模数据。
