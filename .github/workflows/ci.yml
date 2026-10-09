@@ -34,6 +34,35 @@ jobs:
           pitbridge verify --out outputs
           pitbridge rolling-demo --out outputs/rolling
           pitbridge verify-rolling --out outputs/rolling
+  verify-pandas:
+    name: Optional pandas (${{ matrix.os }}, Python ${{ matrix.python-version }}, pandas ${{ matrix.pandas-version }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python-version: '3.11'
+            pandas-version: '2'
+          - os: ubuntu-latest
+            python-version: '3.12'
+            pandas-version: '3'
+          - os: windows-latest
+            python-version: '3.12'
+            pandas-version: '3'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install the optional example dependency
+        run: python -m pip install -e . "pandas==${{ matrix.pandas-version }}.*"
+      - name: Counterexamples and optional CSV contracts
+        run: python -m unittest discover -s tests -v
+      - name: Run the optional CSV example when present
+        if: hashFiles('examples/pandas_csv.py') != ''
+        run: python examples/pandas_csv.py
   windows-quickstart:
     runs-on: windows-latest
     timeout-minutes: 10
