@@ -30,6 +30,19 @@ If changing reports or exports, regenerate and verify both bundles:
 .venv/bin/python -m pitbridge verify-rolling --out outputs/rolling
 ```
 
+The core CI jobs use the package's default installation without pandas. Optional
+CSV-adapter tests skip in that environment. To run those tests when the example
+is present, install pandas separately and rerun the suite:
+
+```bash
+.venv/bin/python -m pip install "pandas>=2,<4"
+.venv/bin/python -m unittest discover -s tests -v
+```
+
+Dedicated CI jobs install pandas 2 on Linux and pandas 3 on Linux and Windows.
+They run the full suite and the CSV example when present; pandas remains outside
+the package's runtime dependencies.
+
 ## Where to work
 
 | Area | Implementation | Regression cases |
