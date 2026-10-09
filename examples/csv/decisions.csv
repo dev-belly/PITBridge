@@ -1,0 +1,4 @@
+decision_id,entity_id,decision_at
+01-before-arrival,SME-001,2026-02-01T00:00:00Z
+02-original-known,SME-001,2026-02-15T00:00:00Z
+03-correction-known,SME-001,2026-04-15T00:00:00Z
