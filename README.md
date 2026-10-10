@@ -160,6 +160,10 @@ published, CI-verified downstream source-to-prediction integration. MIT license.
 
 ## Feedback and contributions
 
+Want to show this counterexample to someone else?
+[Copy the short English or Chinese walkthrough](docs/SHARE.md), with the source,
+the runnable example and the trial-feedback link.
+
 Tried the invoice or CSV example?
 [Share trial feedback](https://github.com/dev-belly/PITBridge/issues/new?template=trial_feedback.md)
 with your command, environment and expected selection.
