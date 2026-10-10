@@ -32,5 +32,5 @@ class SpreadsheetExportTests(unittest.TestCase):
             write_bundle(data, tmp)
             normalized = read_json(Path(tmp, "inputs.json"))
             self.assertTrue(any(row["decision_id"] == "=DECISION()" for row in normalized["decisions"]))
-            self.assertIn("'=DECISION()", Path(tmp, "snapshots.csv").read_text())
+            self.assertIn("'=DECISION()", Path(tmp, "snapshots.csv").read_text(encoding="utf-8"))
             self.assertTrue(verify_bundle(tmp)["verified"])

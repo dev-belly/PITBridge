@@ -34,12 +34,12 @@ class PandasCSVTests(unittest.TestCase):
         self.directory = Path(self.temp.name)
         self.tables = {}
         for path in (EXAMPLES / "csv").glob("*.csv"):
-            with path.open(newline="") as stream:
+            with path.open(encoding="utf-8", newline="") as stream:
                 self.tables[path.stem] = list(csv.DictReader(stream))
 
     def load(self):
         for name, rows in self.tables.items():
-            with (self.directory / f"{name}.csv").open("w", newline="") as stream:
+            with (self.directory / f"{name}.csv").open("w", encoding="utf-8", newline="") as stream:
                 writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
                 writer.writeheader()
                 writer.writerows(rows)

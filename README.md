@@ -5,7 +5,9 @@
 **Financial features as they were known when a decision was made.**
 
 [![CI](https://github.com/dev-belly/PITBridge/actions/workflows/ci.yml/badge.svg)](https://github.com/dev-belly/PITBridge/actions/workflows/ci.yml)
-[Open the online report](https://dev-belly.github.io/PITBridge/) · [中文说明](README.zh-CN.md) · [Methodology](docs/METHODOLOGY.md) · [Data contract](docs/DATA_CONTRACT.md) · [Interview notes](docs/INTERVIEW.md)
+[Try one invoice](examples/README.md#a-correction-that-arrives-later) · [Bring CSV tables](examples/README.md#optional-pandascsv-input) · [Open the online report](https://dev-belly.github.io/PITBridge/) · [中文说明](README.zh-CN.md)
+
+[Methodology](docs/METHODOLOGY.md) · [Data contract](docs/DATA_CONTRACT.md) · [Interview notes](docs/INTERVIEW.md)
 
 An invoice dated January can be published in February, arrive in March, and be corrected later. Joining on January's date alone can put future knowledge into an earlier credit decision. PITBridge resolves **event time, publication time, ingestion time and observation revisions** before exporting a feature snapshot.
 
@@ -44,6 +46,8 @@ python -m venv .venv
 Open `outputs/report.html` in a browser. The report is self-contained, works
 offline and includes a filter for changed selections. Later command snippets
 use `.venv/bin/python`; on Windows substitute `.\.venv\Scripts\python.exe`.
+Saved report files also keep LF endings when Git uses `core.autocrlf=true`, so
+the committed `demo` and `demo/rolling` bundles retain their hashes on Windows.
 
 ```bash
 # Bring your own observations, decisions and feature specs:
@@ -66,6 +70,11 @@ original is available on February 6, while its correction arrives on April 3.
 The January event date is the same for both versions. The April correction
 cannot become a February feature. [See the input lists and full output](examples/README.md)
 to adapt the example to your own data.
+
+Starting from tables? The [optional pandas/CSV example](examples/README.md#optional-pandascsv-input)
+reads three small CSVs and produces the same three selections. Install pandas
+separately; the core package remains dependency-free. Tried either path?
+[Share what worked or blocked you](https://github.com/dev-belly/PITBridge/issues/new?template=trial_feedback.md).
 
 ## What the saved example proves
 
@@ -150,6 +159,10 @@ PITBridge remains independently usable, while CreditVintage provides a
 published, CI-verified downstream source-to-prediction integration. MIT license.
 
 ## Feedback and contributions
+
+Tried the invoice or CSV example?
+[Share trial feedback](https://github.com/dev-belly/PITBridge/issues/new?template=trial_feedback.md)
+with your command, environment and expected selection.
 
 Found an unexpected selection or an installation problem?
 [Open an issue with a small reproduction](https://github.com/dev-belly/PITBridge/issues/new/choose).

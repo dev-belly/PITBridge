@@ -1,0 +1,2 @@
+# Saved reports and their manifests must preserve the same bytes on Windows.
+* text=auto eol=lf
