@@ -99,6 +99,8 @@ PITBridge 现在不仅是独立演示组件，也被
 
 ## 反馈与贡献
 
+[可直接分享的中英案例介绍](docs/SHARE.md)包含反例结果、运行命令、源码和试用反馈入口。
+
 运行失败或发现选错记录时，欢迎[提交包含最小合成案例的 issue](https://github.com/dev-belly/PITBridge/issues/new/choose)。
 [贡献指南](CONTRIBUTING.md)列出实现与回归位置、运行命令和核验要求，欢迎补充反例、可选适配示例和文档。
 如果这套方法对你有用，可以点 Star 留作以后查阅。
