@@ -67,6 +67,8 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 10
     steps:
+      - name: Exercise Windows Git line endings
+        run: git config --global core.autocrlf true
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -87,3 +89,14 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           .\.venv\Scripts\python.exe -m pitbridge verify-rolling --out outputs/rolling
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify committed bundles from the Windows checkout
+        shell: pwsh
+        run: |
+          .\.venv\Scripts\python.exe -m pitbridge verify --out demo
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          .\.venv\Scripts\python.exe -m pitbridge verify-rolling --out demo/rolling
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Run the core suite with native Windows text encoding
+        env:
+          PYTHONUTF8: '0'
+        run: .\.venv\Scripts\python.exe -m unittest discover -s tests -v

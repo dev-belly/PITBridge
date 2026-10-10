@@ -2,6 +2,8 @@
 
 **核心问题：做出信贷决策时，银行当时到底能看到哪个版本的数据？**
 
+[先试一张发票](examples/README.md#a-correction-that-arrives-later) · [从 CSV 表格开始](examples/README.md#optional-pandascsv-input) · [在线报告](https://dev-belly.github.io/PITBridge/) · [提交试用反馈](https://github.com/dev-belly/PITBridge/issues/new?template=trial_feedback.md)
+
 例如，一月份开票金额在二月份公开、三月份才进入银行系统，四月份又被修订。直接按照“一月份”去关联历史申请，会把后来的信息放进早期特征，导致回测过于乐观。
 
 PITBridge 同时处理数据发生时间、公开时间、入库时间和修订版本；以 SQLite SQL 生成特征，用独立 Python 枚举结果核验，并保留每一个特征的来源记录。
@@ -25,6 +27,7 @@ python -m venv .venv
 Linux / macOS 用 `python3 -m venv .venv` 创建环境，并将上述 `.\.venv\Scripts\python.exe` 换成 `.venv/bin/python`；完整命令见[英文快速运行](README.md#run-in-one-minute)。
 
 打开 `outputs/report.html` 即可查看离线报告。无第三方运行依赖，安装与示例在 Linux 和 Windows CI 中检查。
+仓库用 `.gitattributes` 保留 LF 换行；Windows Git 开启 `core.autocrlf=true` 时，已保存的快照和滚动报告也保持原哈希。
 
 ## 可直接复用的 Python 案例
 
@@ -38,6 +41,19 @@ Linux / macOS 用 `python3 -m venv .venv` 创建环境，并将上述 `.\.venv\S
 
 原始记录 2 月 6 日才可用，修订记录 4 月 3 日才可用；不能把四月份的修订带回二月份。
 脚本直接调用 `build_snapshot`，并用独立 Python 枚举核对结果；替换其中的源记录、决策和字段规则即可试用自己的数据。[完整说明](examples/README.md)。
+
+## 从 CSV 表格试用
+
+已经有表格时，可运行已合并的 pandas 适配示例。pandas 单独安装，核心包不依赖它：
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install "pandas>=2,<4"
+.\.venv\Scripts\python.exe examples/pandas_csv.py
+```
+
+示例读取 `examples/csv/` 的三份合成表格，输出同样的三条记录：尚未可用、`invoice-v1`（100,000）、`invoice-v2`（135,000）。它保留有时区的时间、整数修订、撤销标记和显式缺失，并逐字段与独立 Python 实现核对；不把缺失值填成零。[字段规则和替换自己的表格](examples/README.md#optional-pandascsv-input)。
+
+试用后可[反馈卡住的步骤或实际选择结果](https://github.com/dev-belly/PITBridge/issues/new?template=trial_feedback.md)，帮助补充适配器、文档和反例。
 
 ## 已实现的重点
 

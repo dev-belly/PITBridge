@@ -195,7 +195,7 @@ class RollingBundleTests(unittest.TestCase):
     def rehash(self, root, filename):
         manifest = read_json(root/"manifest.json")
         manifest["files"][filename] = sha256((root/filename).read_bytes()).hexdigest()
-        (root/"manifest.json").write_text(canonical(manifest))
+        (root/"manifest.json").write_text(canonical(manifest), encoding="utf-8", newline="")
 
     def test_full_bundle_replays_and_is_deterministic(self):
         self.assertEqual(rolling_artifacts(rolling_demo_inputs()), rolling_artifacts(rolling_demo_inputs()))
@@ -207,9 +207,9 @@ class RollingBundleTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             write_rolling_bundle(rolling_demo_inputs(), root)
-            content = (root/"features.csv").read_text()
+            content = (root/"features.csv").read_text(encoding="utf-8")
             self.assertIn("1500.0", content)
-            (root/"features.csv").write_text(content.replace("1500.0", "1501.0", 1))
+            (root/"features.csv").write_text(content.replace("1500.0", "1501.0", 1), encoding="utf-8", newline="")
             self.rehash(root, "features.csv")
             with self.assertRaisesRegex(ValueError, "semantic replay"):
                 verify_rolling_bundle(root)
@@ -218,8 +218,8 @@ class RollingBundleTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             write_rolling_bundle(rolling_demo_inputs(), root)
-            content = (root/"members.csv").read_text()
-            (root/"members.csv").write_text(content.replace("cash-v1", "cash-v2", 1))
+            content = (root/"members.csv").read_text(encoding="utf-8")
+            (root/"members.csv").write_text(content.replace("cash-v1", "cash-v2", 1), encoding="utf-8", newline="")
             self.rehash(root, "members.csv")
             with self.assertRaisesRegex(ValueError, "semantic replay"):
                 verify_rolling_bundle(root)
@@ -230,7 +230,7 @@ class RollingBundleTests(unittest.TestCase):
             write_rolling_bundle(rolling_demo_inputs(), root)
             summary = read_json(root/"summary.json")
             summary["member_rows"] += 1
-            (root/"summary.json").write_text(canonical(summary))
+            (root/"summary.json").write_text(canonical(summary), encoding="utf-8", newline="")
             self.rehash(root, "summary.json")
             with self.assertRaisesRegex(ValueError, "semantic replay"):
                 verify_rolling_bundle(root)
@@ -240,7 +240,7 @@ class RollingBundleTests(unittest.TestCase):
         data["observations"] = []
         with tempfile.TemporaryDirectory() as directory:
             write_rolling_bundle(data, directory)
-            self.assertEqual(len((Path(directory)/"members.csv").read_text().splitlines()), 1)
+            self.assertEqual(len((Path(directory)/"members.csv").read_text(encoding="utf-8").splitlines()), 1)
             self.assertTrue(verify_rolling_bundle(directory)["verified"])
 
     def test_identifiers_are_spreadsheet_safe_and_html_escaped(self):

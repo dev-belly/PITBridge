@@ -20,6 +20,9 @@ python3 -m venv .venv
 
 On Windows, create the environment with `python -m venv .venv` and replace
 `.venv/bin/python` with `.\.venv\Scripts\python.exe`. Activation is optional.
+Keep saved bundles in LF form: `.gitattributes` preserves their bytes even with
+`core.autocrlf=true`. The Windows quick-start job also verifies committed bundles
+and runs the core suite with native text encoding, as well as generating new reports.
 
 If changing reports or exports, regenerate and verify both bundles:
 
@@ -67,6 +70,8 @@ correct. Explain any intentional contract change before changing saved data.
 - A synthetic counterexample for a rule that is not yet covered.
 - A runnable optional pandas/CSV adapter example, keeping pandas out of the
   package's runtime dependencies and preserving timezone-aware values.
+- A [trial report](https://github.com/dev-belly/PITBridge/issues/new?template=trial_feedback.md)
+  showing which invoice or CSV instruction worked, or where you got stuck.
 - A clearer worked example or a correction to the English/Chinese docs.
 
 The project is a reference implementation, not a full feature-store service.
