@@ -16,7 +16,10 @@ def utc(value: str) -> str:
         raise ValueError(f"invalid timestamp: {value!r}") from exc
     if parsed.tzinfo is None or parsed.utcoffset() is None:
         raise ValueError("naive timestamps are forbidden; include Z or an offset")
-    return parsed.astimezone(timezone.utc).isoformat(timespec="microseconds")
+    try:
+        return parsed.astimezone(timezone.utc).isoformat(timespec="microseconds")
+    except OverflowError as exc:
+        raise ValueError("timestamp is outside the supported UTC datetime range") from exc
 
 
 def _identifier(value: str, name: str) -> None:
