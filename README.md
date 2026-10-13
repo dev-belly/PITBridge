@@ -9,6 +9,10 @@
 
 [Methodology](docs/METHODOLOGY.md) · [Data contract](docs/DATA_CONTRACT.md) · [Interview notes](docs/INTERVIEW.md)
 
+[Scale measurements](docs/SCALING.md): three isolated trials each at 100,000 and
+1,000,000 observations, with late corrections, tombstones, TTL and an independent
+oracle sample. Reproduce with `pitbridge benchmark --rows 100000 1000000 --repeats 3`.
+
 An invoice dated January can be published in February, arrive in March, and be corrected later. Joining on January's date alone can put future knowledge into an earlier credit decision. PITBridge resolves **event time, publication time, ingestion time and observation revisions** before exporting a feature snapshot.
 
 ![Decision-time leakage counterexample](docs/evidence.png)
