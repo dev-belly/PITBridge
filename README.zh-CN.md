@@ -76,6 +76,11 @@ Linux / macOS 用 `python3 -m venv .venv` 创建环境，并将上述 `.\.venv\S
 
 ## 已验证的下游集成
 
+独立的 **Installed distribution** CI 会先生成源码包，再由源码包构建 wheel，
+在全新虚拟环境中离开源码目录安装；不使用包索引，分别生成和完整核验快照与滚动报告。
+检查覆盖 Linux Python 3.11/3.12 和 Windows Python 3.12。
+[本机安装包核验命令](CONTRIBUTING.md#verify-the-built-package)与 CI 使用同一个脚本。
+
 PITBridge 现在不仅是独立演示组件，也被
 [CreditVintage](https://github.com/dev-belly/CreditVintage) 的真实适配器代码路径调用。
 公开的 [PITBridge × CreditVintage 溯源页面](https://dev-belly.github.io/CreditVintage/lineage/)

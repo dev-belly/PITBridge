@@ -1,14 +1,21 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "pitbridge"
 version = "0.1.0"
 description = "Availability-aware financial feature snapshots with revision lineage"
+readme = "README.md"
 requires-python = ">=3.11"
-license = {text = "MIT"}
+license = "MIT"
+license-files = ["LICENSE"]
 dependencies = []
+
+[project.urls]
+Repository = "https://github.com/dev-belly/PITBridge"
+Reports = "https://dev-belly.github.io/PITBridge/"
+Issues = "https://github.com/dev-belly/PITBridge/issues"
 
 [project.optional-dependencies]
 figures = ["matplotlib>=3.8,<4"]
