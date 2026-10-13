@@ -1,0 +1,148 @@
+{
+  "environment": {
+    "logical_cpus": 9,
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+    "python": "3.12.14",
+    "sqlite": "3.53.1"
+  },
+  "limitations": [
+    "Synthetic scalar workload; not rolling aggregation or online serving.",
+    "Local machine measurements; no portable latency or throughput guarantee.",
+    "Whole-process peak RSS is not incremental SQLite memory.",
+    "One-repeat runs do not establish timing variability."
+  ],
+  "measurement": "fresh child process per trial; in-memory SQLite; validation + load + query + Snapshot objects",
+  "memory_scope": "whole child-process high-water RSS including generation, SQLite and oracle; null if unavailable",
+  "oracle_scope": "all 4 decisions for the first 8 entities, independent Python enumeration",
+  "project": "PITBridge scale benchmark",
+  "seed": 42,
+  "source_sha256": {
+    "benchmark.py": "950be36b0f351ef857f263d733d3d10b4a0e4dafc9d5a5eb5c32777a48609285",
+    "core.py": "f574d1f67aa05e4a89b15204edd6f260c01ee90a6c7fe538bbc42344fd3c38b1"
+  },
+  "trials": [
+    {
+      "max_peak_process_rss_bytes": 141668352,
+      "max_snapshot_seconds": 2.892262128999846,
+      "median_snapshot_seconds": 2.874797944999955,
+      "min_snapshot_seconds": 2.8642050810001365,
+      "observations": 100000,
+      "repeats": 3,
+      "runs": [
+        {
+          "correctness": "verified",
+          "decisions": 20000,
+          "entities": 5000,
+          "generation_seconds": 1.1052108239998688,
+          "lookups": 20000,
+          "lookups_per_second": 6982.740213915236,
+          "observations": 100000,
+          "oracle_lookups": 32,
+          "output_sha256": "4cfadf9993718649ee02e802bacc3552c4d64c49fb830771b8a63245e49259e2",
+          "peak_process_rss_bytes": 141668352,
+          "snapshot_seconds": 2.8642050810001365,
+          "statuses": {
+            "selected": 15000,
+            "stale": 5000
+          }
+        },
+        {
+          "correctness": "verified",
+          "decisions": 20000,
+          "entities": 5000,
+          "generation_seconds": 1.1171927499999583,
+          "lookups": 20000,
+          "lookups_per_second": 6915.002550932708,
+          "observations": 100000,
+          "oracle_lookups": 32,
+          "output_sha256": "4cfadf9993718649ee02e802bacc3552c4d64c49fb830771b8a63245e49259e2",
+          "peak_process_rss_bytes": 141602816,
+          "snapshot_seconds": 2.892262128999846,
+          "statuses": {
+            "selected": 15000,
+            "stale": 5000
+          }
+        },
+        {
+          "correctness": "verified",
+          "decisions": 20000,
+          "entities": 5000,
+          "generation_seconds": 1.1288841110001613,
+          "lookups": 20000,
+          "lookups_per_second": 6957.010677840983,
+          "observations": 100000,
+          "oracle_lookups": 32,
+          "output_sha256": "4cfadf9993718649ee02e802bacc3552c4d64c49fb830771b8a63245e49259e2",
+          "peak_process_rss_bytes": 141668352,
+          "snapshot_seconds": 2.874797944999955,
+          "statuses": {
+            "selected": 15000,
+            "stale": 5000
+          }
+        }
+      ]
+    },
+    {
+      "max_peak_process_rss_bytes": 1142456320,
+      "max_snapshot_seconds": 31.463485046000187,
+      "median_snapshot_seconds": 31.130275182999867,
+      "min_snapshot_seconds": 30.26262326599999,
+      "observations": 1000000,
+      "repeats": 3,
+      "runs": [
+        {
+          "correctness": "verified",
+          "decisions": 200000,
+          "entities": 50000,
+          "generation_seconds": 11.732936817000109,
+          "lookups": 200000,
+          "lookups_per_second": 6424.613943317125,
+          "observations": 1000000,
+          "oracle_lookups": 32,
+          "output_sha256": "97d4b60549c8b5986a746df803b5f15bc202af830d08e9dc7882a0fa9be37ac0",
+          "peak_process_rss_bytes": 1142452224,
+          "snapshot_seconds": 31.130275182999867,
+          "statuses": {
+            "selected": 150000,
+            "stale": 50000
+          }
+        },
+        {
+          "correctness": "verified",
+          "decisions": 200000,
+          "entities": 50000,
+          "generation_seconds": 12.916564290999986,
+          "lookups": 200000,
+          "lookups_per_second": 6356.574921932404,
+          "observations": 1000000,
+          "oracle_lookups": 32,
+          "output_sha256": "97d4b60549c8b5986a746df803b5f15bc202af830d08e9dc7882a0fa9be37ac0",
+          "peak_process_rss_bytes": 1142456320,
+          "snapshot_seconds": 31.463485046000187,
+          "statuses": {
+            "selected": 150000,
+            "stale": 50000
+          }
+        },
+        {
+          "correctness": "verified",
+          "decisions": 200000,
+          "entities": 50000,
+          "generation_seconds": 11.473437985999908,
+          "lookups": 200000,
+          "lookups_per_second": 6608.812403407859,
+          "observations": 1000000,
+          "oracle_lookups": 32,
+          "output_sha256": "97d4b60549c8b5986a746df803b5f15bc202af830d08e9dc7882a0fa9be37ac0",
+          "peak_process_rss_bytes": 1142452224,
+          "snapshot_seconds": 30.26262326599999,
+          "statuses": {
+            "selected": 150000,
+            "stale": 50000
+          }
+        }
+      ]
+    }
+  ],
+  "workload": "20 observations/entity: 18 events, late revision, later tombstone; 4 decisions; 80-day TTL"
+}

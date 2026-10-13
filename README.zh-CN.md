@@ -1,5 +1,7 @@
 # PITBridge｜金融时点数据与版本溯源
 
+[规模实测](docs/SCALING.md)：十万与百万行观察记录各运行三次，记录耗时、整个进程的峰值内存、源代码哈希和输出摘要；包含迟到修订、删除后的回退、TTL 及独立计算抽样对照。
+
 **核心问题：做出信贷决策时，银行当时到底能看到哪个版本的数据？**
 
 [先试一张发票](examples/README.md#a-correction-that-arrives-later) · [从 CSV 表格开始](examples/README.md#optional-pandascsv-input) · [在线报告](https://dev-belly.github.io/PITBridge/) · [提交试用反馈](https://github.com/dev-belly/PITBridge/issues/new?template=trial_feedback.md)
