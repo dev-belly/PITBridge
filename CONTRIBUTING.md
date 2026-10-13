@@ -46,6 +46,24 @@ Dedicated CI jobs install pandas 2 on Linux and pandas 3 on Linux and Windows.
 They run the full suite and the CSV example when present; pandas remains outside
 the package's runtime dependencies.
 
+## Verify the built package
+
+The **Installed distribution** jobs build a source archive and then its wheel.
+They install the wheel without a package index into a clean virtual environment,
+run outside the source tree, and generate and fully verify both the scalar and
+rolling reports. This catches command-entry-point and packaging failures that
+an editable install can hide. The existing library/CSV and Windows checkout
+checks still run separately.
+
+```bash
+.venv/bin/python -m pip install build
+.venv/bin/python -m build --outdir dist
+.venv/bin/python scripts/check_distribution.py dist
+```
+
+On Windows, substitute `.\.venv\Scripts\python.exe` as above. The script cleans
+up its temporary environment and reports; it never replaces saved evidence.
+
 ## Where to work
 
 | Area | Implementation | Regression cases |

@@ -129,6 +129,12 @@ membership and values.
 
 ## Verified downstream integration
 
+The **Installed distribution** CI jobs additionally build a source archive,
+build its wheel and install without a package index in a clean virtual environment.
+Both scalar and rolling reports are generated and fully replayed outside the
+source tree on Linux Python 3.11/3.12 and Windows Python 3.12. See the
+[local package check](CONTRIBUTING.md#verify-the-built-package) for the same commands.
+
 PITBridge is also exercised by a real downstream adapter in
 [CreditVintage](https://github.com/dev-belly/CreditVintage). The published
 [PITBridge × CreditVintage explorer](https://dev-belly.github.io/CreditVintage/lineage/)
