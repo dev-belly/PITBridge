@@ -23,6 +23,11 @@ Python 3.11+ and Git are required. There are **no third-party runtime
 dependencies**. The commands use a virtual environment without requiring
 activation.
 
+These commands clone `main`. The [v0.1.0 release](https://github.com/dev-belly/PITBridge/releases/tag/v0.1.0)
+is an earlier snapshot: the optional CSV example and `benchmark` command were
+added [after that tag](https://github.com/dev-belly/PITBridge/compare/v0.1.0...main).
+Use `main` for those examples, or follow the tagged release's own instructions.
+
 **Linux / macOS**
 
 ```bash
