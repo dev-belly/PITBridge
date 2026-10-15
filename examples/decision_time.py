@@ -37,6 +37,15 @@ def main():
     snapshots = build_snapshot(observations, decisions, specs)
     if snapshots != reference_snapshot(observations, decisions, specs):
         raise RuntimeError("SQL and independent temporal replay disagree")
+    # Check the documented business result independently of either engine.
+    expected = [
+        ("01-before-arrival", None, "not_available", None),
+        ("02-original-known", 100000.0, "selected", "invoice-v1"),
+        ("03-correction-known", 135000.0, "selected", "invoice-v2"),
+    ]
+    actual = [(row.decision_id, row.value, row.status, row.record_id) for row in snapshots]
+    if actual != expected:
+        raise RuntimeError("Invoice selections differ from the three documented decisions")
     print(json.dumps([asdict(row) for row in snapshots], indent=2))
 
 

@@ -16,6 +16,10 @@ PITBridge 同时处理数据发生时间、公开时间、入库时间和修订�
 
 需要 Git 和 Python 3.11 或更高版本。下面是 Windows PowerShell 命令，使用独立环境，无需先激活：
 
+这些命令克隆 `main`。[v0.1.0 发布版本](https://github.com/dev-belly/PITBridge/releases/tag/v0.1.0)
+是较早的代码快照；可选 CSV 示例和 `benchmark` 命令均在[该标签之后加入](https://github.com/dev-belly/PITBridge/compare/v0.1.0...main)。
+试用这些功能请使用 `main`；若选择发布标签，请按该版本自己的说明运行。
+
 ```powershell
 git clone https://github.com/dev-belly/PITBridge.git
 cd PITBridge
