@@ -1,5 +1,13 @@
 # Small, runnable examples
 
+Want to edit a timestamp without setting up a local checkout?
+[Open the invoice notebook in Colab](https://colab.research.google.com/github/dev-belly/PITBridge/blob/main/examples/decision_time.ipynb)
+or [inspect its source](decision_time.ipynb). It installs dev-belly/PITBridge from
+a full source URL pinned to one commit, checks the three fixed decisions, and
+then lets you change decision and correction-ingestion times. Only the standard
+library is used at runtime; installation needs network access. The separate
+editable scenario does not reuse the fixed fixture's expected results.
+
 Install the repository in a Python 3.11+ virtual environment using the
 [quick start](../README.md#run-in-one-minute), then run:
 

@@ -4,7 +4,10 @@
 
 **核心问题：做出信贷决策时，银行当时到底能看到哪个版本的数据？**
 
-[先试一张发票](examples/README.md#a-correction-that-arrives-later) · [从 CSV 表格开始](examples/README.md#optional-pandascsv-input) · [在线报告](https://dev-belly.github.io/PITBridge/) · [提交试用反馈](https://github.com/dev-belly/PITBridge/issues/new?template=trial_feedback.md)
+[浏览器里试一张发票（Colab）](https://colab.research.google.com/github/dev-belly/PITBridge/blob/main/examples/decision_time.ipynb) · [本地案例](examples/README.md#a-correction-that-arrives-later) · [从 CSV 表格开始](examples/README.md#optional-pandascsv-input) · [在线报告](https://dev-belly.github.io/PITBridge/) · [提交试用反馈](https://github.com/dev-belly/PITBridge/issues/new?template=trial_feedback.md)
+
+Notebook 使用 **dev-belly/PITBridge** 的完整源码 URL，固定到一个提交版本，无需克隆。
+修改决策或入库时间，即可查看当时应选择哪个发票版本。
 
 例如，一月份开票金额在二月份公开、三月份才进入银行系统，四月份又被修订。直接按照“一月份”去关联历史申请，会把后来的信息放进早期特征，导致回测过于乐观。
 

@@ -24,6 +24,8 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Run the Python library example
         run: python examples/decision_time.py
+      - name: Run notebook cells against the current package without the pinned install cell
+        run: python scripts/check_notebook.py
       - name: Verify the scale runner on a small deterministic workload
         run: pitbridge benchmark --rows 2000 --repeats 2 --out outputs/scaling-ci
       - name: Replay committed evidence
@@ -82,6 +84,8 @@ jobs:
           .\.venv\Scripts\python.exe -m pip install -e .
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           .\.venv\Scripts\python.exe examples/decision_time.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          .\.venv\Scripts\python.exe scripts/check_notebook.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           .\.venv\Scripts\python.exe -m pitbridge demo --out outputs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
