@@ -1,5 +1,12 @@
 # Share the invoice counterexample
 
+For a browser trial, [open the editable invoice notebook in Colab](https://colab.research.google.com/github/dev-belly/PITBridge/blob/main/examples/decision_time.ipynb):
+no local clone is needed. Its full installation URL selects dev-belly/PITBridge
+at a fixed source commit. All records are synthetic.
+
+也可直接[在浏览器里改两个时间、试一次发票选择](https://colab.research.google.com/github/dev-belly/PITBridge/blob/main/examples/decision_time.ipynb)，
+无需本地克隆；Notebook 通过完整源码 URL 安装固定提交版本，记录均为合成数据。
+
 ## 中文
 
 做金融数据或特征工程时，事后修订容易被误用到历史决策。我做了 [PITBridge](https://github.com/dev-belly/PITBridge)：用合成发票说明，同为2026年1月31日数据，v1于2月5日发布、6日入库，值10万元；v2于4月1日发布、3日入库，值13.5万元。90天新鲜度下，2月1日未可用，2月15日选v1，4月15日选v2；SQL与独立Python逐行核对。[小示例](https://github.com/dev-belly/PITBridge/blob/main/examples/README.md)可本地运行；[在线演示](https://dev-belly.github.io/PITBridge/)展示11条观测、45次查询的大案例。想请你试试CSV输入，反馈时点与修订选择是否贴合你的场景：[提交反馈](https://github.com/dev-belly/PITBridge/issues/new?template=trial_feedback.md)。

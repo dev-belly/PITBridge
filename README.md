@@ -5,7 +5,11 @@
 **Financial features as they were known when a decision was made.**
 
 [![CI](https://github.com/dev-belly/PITBridge/actions/workflows/ci.yml/badge.svg)](https://github.com/dev-belly/PITBridge/actions/workflows/ci.yml)
-[Try one invoice](examples/README.md#a-correction-that-arrives-later) · [Bring CSV tables](examples/README.md#optional-pandascsv-input) · [Open the online report](https://dev-belly.github.io/PITBridge/) · [中文说明](README.zh-CN.md)
+[Run in Colab](https://colab.research.google.com/github/dev-belly/PITBridge/blob/main/examples/decision_time.ipynb) · [Try one invoice locally](examples/README.md#a-correction-that-arrives-later) · [Bring CSV tables](examples/README.md#optional-pandascsv-input) · [Open the online report](https://dev-belly.github.io/PITBridge/) · [中文说明](README.zh-CN.md)
+
+The notebook installs **dev-belly/PITBridge** from a full source URL pinned to one
+commit; no local checkout is needed. Change a decision or ingestion time to see
+which invoice revision remains available.
 
 [Methodology](docs/METHODOLOGY.md) · [Data contract](docs/DATA_CONTRACT.md) · [Interview notes](docs/INTERVIEW.md)
 
