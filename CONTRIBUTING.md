@@ -86,8 +86,10 @@ correct. Explain any intentional contract change before changing saved data.
 ## Useful small contributions
 
 - A synthetic counterexample for a rule that is not yet covered.
-- A runnable optional pandas/CSV adapter example, keeping pandas out of the
-  package's runtime dependencies and preserving timezone-aware values.
+- A small counterexample or pandas-version compatibility improvement for the
+  [existing CSV adapter](examples/pandas_csv.py), with a
+  [minimal reproduction](#where-to-work). Keep pandas optional and preserve
+  timezone-aware values.
 - A [trial report](https://github.com/dev-belly/PITBridge/issues/new?template=trial_feedback.md)
   showing which invoice or CSV instruction worked, or where you got stuck.
 - A clearer worked example or a correction to the English/Chinese docs.

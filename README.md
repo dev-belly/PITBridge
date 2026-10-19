@@ -11,7 +11,7 @@ The notebook installs **dev-belly/PITBridge** from a full source URL pinned to o
 commit; no local checkout is needed. Change a decision or ingestion time to see
 which invoice revision remains available.
 
-[Methodology](docs/METHODOLOGY.md) · [Data contract](docs/DATA_CONTRACT.md) · [Interview notes](docs/INTERVIEW.md)
+[Choosing a tool / API reuse](docs/CHOOSING.md) · [Methodology](docs/METHODOLOGY.md) · [Data contract](docs/DATA_CONTRACT.md) · [Interview notes](docs/INTERVIEW.md)
 
 [Scale measurements](docs/SCALING.md): three isolated trials each at 100,000 and
 1,000,000 observations, with late corrections, tombstones, TTL and an independent
