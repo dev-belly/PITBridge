@@ -66,8 +66,11 @@ The script checks these selections and compares every field with the independent
 
 To use your own tables, call `load_inputs(directory)` with `observations.csv`,
 `decisions.csv` and `specs.csv`, keeping the exact headers in the fixtures.
-Cells are read as strings with `keep_default_na=False`, preserving identifiers
-such as `NA` and exact integer revisions, including values above `2^53`.
+CSV text is parsed once and checked for exact headers, record widths and malformed
+quoting before creating a string DataFrame; errors name the file and physical end
+line of the CSV record. UTF-8 BOMs, quoted commas and multi-line fields remain
+supported; unquoted blank or whitespace-only records are ignored. Text cells preserve
+identifiers such as `NA` and exact integer revisions, including values above `2^53`.
 Revisions require decimal digits in `[1, 2^63-1]`; fractional, scientific and
 boolean representations are rejected. `deleted` requires literal `true` or
 `false`. An empty `value` cell means null and is valid only for a tombstone;
