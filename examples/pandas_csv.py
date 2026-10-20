@@ -1,5 +1,6 @@
 """Optional CSV adapter for the synthetic late-correction example."""
 
+import csv
 from dataclasses import asdict
 import json
 from pathlib import Path
@@ -39,12 +40,45 @@ def load_inputs(directory=FIXTURE):
 
     def rows(name, cls):
         path = Path(directory) / f"{name}.csv"
-        table = pd.read_csv(path, dtype=str, keep_default_na=False)
         expected = set(cls.__dataclass_fields__)
-        if set(table.columns) != expected:
-            raise ValueError(f"{path.name}: expected columns {sorted(expected)}")
+        # Parse one text snapshot before creating a DataFrame: read_csv can infer
+        # an index from extra fields and silently drop it from to_dict(records).
+        with path.open(encoding="utf-8-sig", newline="") as handle:
+            physical_lines = list(handle)
+        reader = csv.reader(physical_lines, strict=True)
+        header = None
+        records, end_lines = [], []
+        previous_line = 0
+        try:
+            for values in reader:
+                end_line = reader.line_num
+                raw_record = "".join(physical_lines[previous_line:end_line])
+                previous_line = end_line
+                # Match pandas' blank-line behavior without removing blank
+                # physical lines inside a quoted multi-line field.
+                if not raw_record.strip():
+                    continue
+                if header is None:
+                    if len(values) != len(expected) or set(values) != expected:
+                        raise ValueError(
+                            f"{path.name}: expected columns {sorted(expected)} "
+                            f"(header ends at physical line {end_line})")
+                    header = values
+                    continue
+                if len(values) != len(header):
+                    raise ValueError(
+                        f"{path.name} row {end_line}: expected {len(header)} fields, "
+                        f"got {len(values)}")
+                records.append(values)
+                end_lines.append(end_line)
+        except csv.Error as exc:
+            raise ValueError(
+                f"{path.name} row {reader.line_num}: malformed CSV quoting: {exc}") from exc
+        if header is None:
+            raise ValueError(f"{path.name}: expected columns {sorted(expected)} (no header found)")
+        table = pd.DataFrame(records, columns=header, dtype=str)
         converted = []
-        for line, fields in enumerate(table.to_dict(orient="records"), 2):
+        for line, fields in zip(end_lines, table.to_dict(orient="records"), strict=True):
             try:
                 if cls is Observation:
                     fields["revision"] = revision_value(fields["revision"])

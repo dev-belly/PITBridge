@@ -115,6 +115,74 @@ class PandasCSVTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "observations.csv: expected columns"):
             self.load()
 
+    def test_wrong_record_width_is_rejected_in_every_table(self):
+        for name in self.tables:
+            for shape in ("extra_first", "extra_last", "missing"):
+                for multiline in (False, True):
+                    with self.subTest(table=name, shape=shape, multiline=multiline):
+                        self.load()
+                        path = self.directory / f"{name}.csv"
+                        with path.open(encoding="utf-8", newline="") as handle:
+                            header, *rows = csv.reader(handle)
+                        if multiline:
+                            rows[0][0] += "\ncontinued"
+                        if shape == "extra_first":
+                            rows = [["UNDECLARED-FIELD", *row] for row in rows]
+                        elif shape == "extra_last":
+                            rows = [[*row, "UNDECLARED-FIELD"] for row in rows]
+                        else:
+                            rows = [row[:-1] for row in rows]
+                        with path.open("w", encoding="utf-8", newline="") as handle:
+                            csv.writer(handle).writerows([header, *rows])
+                        end_line = 3 if multiline else 2
+                        actual_width = len(header) - 1 if shape == "missing" else len(header) + 1
+                        with self.assertRaisesRegex(
+                                ValueError,
+                                rf"{name}\.csv row {end_line}: expected {len(header)} fields, "
+                                rf"got {actual_width}"):
+                            adapter["load_inputs"](self.directory)
+
+    def test_malformed_quoting_names_file_and_physical_end_line(self):
+        for name in self.tables:
+            for location in ("header", "record"):
+                with self.subTest(table=name, location=location):
+                    self.load()
+                    path = self.directory / f"{name}.csv"
+                    header = path.read_text(encoding="utf-8").splitlines()[0]
+                    prefix = "" if location == "header" else header + "\n"
+                    path.write_text(prefix + '"unclosed\ncontinued\n', encoding="utf-8")
+                    end_line = 2 if location == "header" else 3
+                    with self.assertRaisesRegex(
+                            ValueError,
+                            rf"{name}\.csv row {end_line}: malformed CSV quoting"):
+                        adapter["load_inputs"](self.directory)
+
+    def test_quoted_commas_and_multiline_fields_are_preserved(self):
+        entity, source, record = "SME,\n001", "tax,\nfeed", "invoice,\n\nv1"
+        for name in ("observations", "decisions"):
+            for row in self.tables[name]:
+                row["entity_id"] = entity
+        for row in self.tables["observations"]:
+            row.update(source=source, feature="revenue,net")
+        self.tables["observations"][0]["record_id"] = record
+        self.tables["specs"][0].update(source=source, feature="revenue,net")
+        rows = self.snapshots()
+        self.assertEqual(rows[1].record_id, record)
+        self.assertTrue(all(row.entity_id == entity and row.source == source for row in rows))
+
+    def test_bom_and_unquoted_blank_records_remain_supported(self):
+        expected = self.snapshots()
+        for name in self.tables:
+            path = self.directory / f"{name}.csv"
+            original = path.read_bytes()
+            path.write_bytes(b"\xef\xbb\xbf\r\n \t\r\n" + original + b"\r\n\t \r\n")
+        self.assertEqual(build_snapshot(*adapter["load_inputs"](self.directory)), expected)
+
+    def test_multiline_conversion_error_uses_physical_end_line(self):
+        self.tables["observations"][0].update(record_id="invoice\nv1", revision="1.5")
+        with self.assertRaisesRegex(ValueError, "observations.csv row 3: .*revision"):
+            self.load()
+
 
 if __name__ == "__main__":
     unittest.main()
