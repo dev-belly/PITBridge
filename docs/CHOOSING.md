@@ -56,9 +56,10 @@ selection, and [rolling features](ROLLING.md) have their own contract and entry 
 
 ## Continue with your input
 
-Use the [optional CSV example](../examples/README.md#optional-pandascsv-input)
-for three table inputs, or the `build --inputs` JSON route in the input contract.
-Pandas is optional. For a mismatch, keep a minimal synthetic input, the expected
+Use the installed [CSV importer](CSV_INPUTS.md) for three table inputs without
+pandas, the [optional pandas example](../examples/README.md#optional-pandascsv-input)
+for DataFrame exploration, or the `build --inputs` JSON route. For a mismatch,
+keep a minimal synthetic input, the expected
 record and the actual status, then [share trial feedback](https://github.com/dev-belly/PITBridge/issues/new?template=trial_feedback.md).
 
 External references above were checked on 2026-10-19. They describe those tools'
