@@ -3,6 +3,7 @@ import json
 import sys
 
 from .bundle import read_json, verify_bundle, write_bundle
+from .csv_inputs import load_csv_inputs
 from .demo import demo_inputs
 from .rolling_bundle import rolling_demo_inputs, verify_rolling_bundle, write_rolling_bundle
 
@@ -19,7 +20,9 @@ def main(argv=None):
         p = sub.add_parser(command)
         p.add_argument("--out", default="outputs/rolling" if command in ("rolling-demo", "aggregate", "verify-rolling") else "outputs")
         if command in ("build", "aggregate"):
-            p.add_argument("--inputs", required=True, help="JSON observations, decisions and specs")
+            source = p.add_mutually_exclusive_group(required=True)
+            source.add_argument("--inputs", help="JSON observations, decisions and specs")
+            source.add_argument("--csv-dir", help="Directory with observations.csv, decisions.csv and specs.csv (rolling_specs.csv for aggregate)")
     args = parser.parse_args(argv)
     try:
         if args.command == "benchmark":
@@ -28,10 +31,16 @@ def main(argv=None):
         elif args.command == "verify-rolling":
             result = verify_rolling_bundle(args.out)
         elif args.command in ("rolling-demo", "aggregate"):
-            data = rolling_demo_inputs() if args.command == "rolling-demo" else read_json(args.inputs)
+            data = rolling_demo_inputs() if args.command == "rolling-demo" else (
+                load_csv_inputs(args.csv_dir, rolling=True) if args.csv_dir else read_json(args.inputs))
             result = write_rolling_bundle(data, args.out)
         else:
-            result = verify_bundle(args.out) if args.command == "verify" else write_bundle(demo_inputs() if args.command == "demo" else read_json(args.inputs), args.out)
+            if args.command == "verify":
+                result = verify_bundle(args.out)
+            else:
+                data = demo_inputs() if args.command == "demo" else (
+                    load_csv_inputs(args.csv_dir) if args.csv_dir else read_json(args.inputs))
+                result = write_bundle(data, args.out)
     except (ValueError, OSError, KeyError) as exc:
         print(f"pitbridge: {exc}", file=sys.stderr)
         return 2

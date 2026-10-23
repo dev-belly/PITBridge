@@ -2,6 +2,11 @@
 
 The JSON root requires `observations`, `decisions` and `specs` arrays. Optional `data_kind` is `synthetic` or `user_supplied` (default). Extra fields, duplicate JSON keys and non-finite JSON constants are rejected. The provenance label is supplied by the caller; it is not externally authenticated.
 
+For table inputs, `build --csv-dir DIRECTORY` and `aggregate --csv-dir DIRECTORY`
+apply the same temporal and identity contracts without pandas. The
+[CSV intake contract](CSV_INPUTS.md) defines exact headers, null/boolean parsing
+and file/physical-line errors. JSON and CSV are mutually exclusive input routes.
+
 ## Observations
 
 | Field | Type / rule |

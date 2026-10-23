@@ -5,7 +5,7 @@
 **Financial features as they were known when a decision was made.**
 
 [![CI](https://github.com/dev-belly/PITBridge/actions/workflows/ci.yml/badge.svg)](https://github.com/dev-belly/PITBridge/actions/workflows/ci.yml)
-[Run in Colab](https://colab.research.google.com/github/dev-belly/PITBridge/blob/main/examples/decision_time.ipynb) · [Try one invoice locally](examples/README.md#a-correction-that-arrives-later) · [Bring CSV tables](examples/README.md#optional-pandascsv-input) · [Open the online report](https://dev-belly.github.io/PITBridge/) · [中文说明](README.zh-CN.md)
+[Run in Colab](https://colab.research.google.com/github/dev-belly/PITBridge/blob/main/examples/decision_time.ipynb) · [Try one invoice locally](examples/README.md#a-correction-that-arrives-later) · [Bring CSV tables](docs/CSV_INPUTS.md) · [Open the online report](https://dev-belly.github.io/PITBridge/) · [中文说明](README.zh-CN.md)
 
 The notebook installs **dev-belly/PITBridge** from a full source URL pinned to one
 commit; no local checkout is needed. Change a decision or ingestion time to see
@@ -28,7 +28,7 @@ dependencies**. The commands use a virtual environment without requiring
 activation.
 
 These commands clone `main`. The [v0.1.0 release](https://github.com/dev-belly/PITBridge/releases/tag/v0.1.0)
-is an earlier snapshot: the optional CSV example and `benchmark` command were
+is an earlier snapshot: the installed CSV importer, optional pandas example and `benchmark` command were
 added [after that tag](https://github.com/dev-belly/PITBridge/compare/v0.1.0...main).
 Use `main` for those examples, or follow the tagged release's own instructions.
 
@@ -84,9 +84,17 @@ The January event date is the same for both versions. The April correction
 cannot become a February feature. [See the input lists and full output](examples/README.md)
 to adapt the example to your own data.
 
-Starting from tables? The [optional pandas/CSV example](examples/README.md#optional-pandascsv-input)
-reads three small CSVs and produces the same three selections. Install pandas
-separately; the core package remains dependency-free. Tried either path?
+Starting from tables? Import three strict CSVs directly through the installed
+CLI, with **no pandas required**:
+
+```bash
+.venv/bin/python -m pitbridge build --csv-dir examples/csv --out outputs/csv
+.venv/bin/python -m pitbridge verify --out outputs/csv
+```
+
+The [CSV contract](docs/CSV_INPUTS.md) covers headers, nulls, revisions, timestamps
+and rolling tables. The [optional pandas example](examples/README.md#optional-pandascsv-input)
+remains available for DataFrame-based exploration. Tried either path?
 [Share what worked or blocked you](https://github.com/dev-belly/PITBridge/issues/new?template=trial_feedback.md).
 
 ## What the saved example proves
@@ -147,6 +155,9 @@ build its wheel and install without a package index in a clean virtual environme
 Both scalar and rolling reports are generated and fully replayed outside the
 source tree on Linux Python 3.11/3.12 and Windows Python 3.12. See the
 [local package check](CONTRIBUTING.md#verify-the-built-package) for the same commands.
+Those jobs also import equivalent scalar and rolling CSV tables through the
+installed command, verify both bundles and compare their feature/lineage CSVs
+byte for byte with the JSON runs.
 
 PITBridge is also exercised by a real downstream adapter in
 [CreditVintage](https://github.com/dev-belly/CreditVintage). The published

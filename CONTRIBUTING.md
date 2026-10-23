@@ -33,8 +33,9 @@ If changing reports or exports, regenerate and verify both bundles:
 .venv/bin/python -m pitbridge verify-rolling --out outputs/rolling
 ```
 
-The core CI jobs use the package's default installation without pandas. Optional
-CSV-adapter tests skip in that environment. To run those tests when the example
+The core CI jobs use the package's default installation without pandas. Native
+CSV intake tests always run; only optional pandas-example tests skip in that
+environment. To run those tests when the example
 is present, install pandas separately and rerun the suite:
 
 ```bash
@@ -52,7 +53,9 @@ The **Installed distribution** jobs build a source archive and then its wheel.
 They install the wheel without a package index into a clean virtual environment,
 run outside the source tree, and generate and fully verify both the scalar and
 rolling reports. This catches command-entry-point and packaging failures that
-an editable install can hide. The existing library/CSV and Windows checkout
+an editable install can hide. Both CSV input routes are exercised from the
+installed command and their feature/lineage tables must match the JSON runs.
+The existing library/CSV and Windows checkout
 checks still run separately.
 
 ```bash
@@ -72,6 +75,7 @@ up its temporary environment and reports; it never replaces saved evidence.
 | Rolling aggregation and contributor selection | `src/pitbridge/rolling.py` | `tests/test_rolling.py` |
 | Reports, CSV exports and semantic verification | `src/pitbridge/bundle.py`, `src/pitbridge/rolling_bundle.py` | `tests/test_bundle.py`, `tests/test_spreadsheet_export.py` |
 | Input errors from the CLI | `core.py`, `rolling.py`, `cli.py` | `tests/test_window_contracts.py` |
+| Installed CSV intake, exact revisions and physical-line diagnostics | `src/pitbridge/csv_inputs.py` | `tests/test_csv_inputs.py` |
 
 For a bug, provide the smallest synthetic input, the command, the expected
 selection and the actual result. An example with two revisions and one
