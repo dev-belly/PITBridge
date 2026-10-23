@@ -248,7 +248,7 @@ class RollingBundleTests(unittest.TestCase):
         malicious = '=SUM(1)</script><script>alert("x")</script>'
         data["decisions"][0]["decision_id"] = malicious
         artifacts = rolling_artifacts(data)
-        self.assertIn("'=SUM", artifacts["features.csv"])
+        self.assertIn("text: =SUM", artifacts["features.csv"])
         self.assertNotIn('<script>alert("x")</script>', artifacts["report.html"])
         self.assertIn("&lt;/script&gt;", artifacts["report.html"])
 

@@ -45,23 +45,28 @@ def decode_inputs(data):
 
 
 def spreadsheet_cell(value):
-    """Neutralize formula-shaped strings; leave numeric financial values untouched."""
+    """Mark untrusted formula-shaped text; leave numeric features untouched."""
+    prefix = "text: "
     if isinstance(value, str) and (
-        value.startswith(("\t", "\r", "\n"))
-        or value.lstrip(" \t\r\n").startswith(("=", "+", "-", "@"))
+        value.startswith((prefix, "\t", "\r", "\n", "\x00", "\ufeff"))
+        or value.lstrip(" \t\r\n\v\f\x00\ufeff").startswith(("=", "+", "-", "@", "＝", "＋", "－", "＠"))
     ):
-        return "'" + value
+        return prefix + value
     return value
 
 
 def csv_text(rows, fields):
     import io
     stream = io.StringIO(newline="")
-    writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
-    writer.writerow({field: spreadsheet_cell(field) for field in fields})
-    writer.writerows({field: spreadsheet_cell(value) for field, value in row.items()}
-                    for row in rows)
-    return stream.getvalue()
+    # Quote lone CR as well as LF. Strip only the writer's record terminator,
+    # preserving embedded line breaks while keeping saved record endings LF.
+    writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\r\n")
+    def record(row):
+        stream.seek(0)
+        stream.truncate(0)
+        writer.writerow({field: spreadsheet_cell(value) for field, value in row.items()})
+        return stream.getvalue()[:-2] + "\n"
+    return record(dict(zip(fields, fields, strict=True))) + "".join(record(row) for row in rows)
 
 
 def compare_unsafe(obs, rows):

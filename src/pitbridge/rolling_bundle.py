@@ -4,6 +4,7 @@ from collections import Counter
 from dataclasses import asdict, fields
 from hashlib import sha256
 from html import escape
+import json
 from pathlib import Path
 
 from .bundle import canonical, csv_text, read_json
@@ -60,13 +61,18 @@ def rolling_demo_inputs():
 
 def render_rolling(summary, features, members):
     label = "SYNTHETIC DATA" if summary["data_kind"] == "synthetic" else "USER-SUPPLIED DATA"
+    def identity(value):
+        # HTML preprocessing normalizes literal CR and replaces NUL. ASCII
+        # JSON keys preserve identities without depending on visible label text.
+        return escape(json.dumps(value, ensure_ascii=True), quote=True)
     def table_rows(rows, columns):
-        return "".join(f'<tr data-decision="{escape(row.decision_id, quote=True)}">' +
+        return "".join(f'<tr data-decision="{identity(row.decision_id)}">' +
             "".join(f"<td>{escape(str(getattr(row, key) if getattr(row, key) is not None else '—'))}</td>"
                     for key in columns) + "</tr>" for row in rows)
     feature_rows = table_rows(features, ("decision_id", "name", "value", "observation_count", "status"))
     member_rows = table_rows(members, ("decision_id", "name", "record_id", "revision", "event_at", "available_at", "value"))
-    options = "".join(f'<option>{escape(name)}</option>' for name in sorted({row.decision_id for row in features}))
+    options = "".join(f'<option value="{identity(name)}">{escape(name)}</option>'
+                      for name in sorted({row.decision_id for row in features}))
     return f"""<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PITBridge · Rolling financial features</title><style>
 *{{box-sizing:border-box}}body{{margin:0;background:#0c1422;color:#e6edf7;font:16px/1.6 system-ui,sans-serif}}main{{max-width:1200px;margin:auto;padding:48px 24px}}h1{{font-size:clamp(34px,6vw,60px);line-height:1.1}}h2{{margin-top:40px}}p{{color:#a9b9cf}}.tag,a,code{{color:#64e5c4}}.cards{{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}}.card{{padding:20px;background:#111e31;border:1px solid #293952;border-radius:12px}}.value{{display:block;font-size:34px;font-weight:700}}.scroll{{overflow:auto;border:1px solid #293952;border-radius:12px}}table{{border-collapse:collapse;width:100%;font-size:13px}}th,td{{padding:12px;text-align:left;border-bottom:1px solid #293952;white-space:nowrap}}th{{color:#9fefd9;background:#17263b}}select{{font:inherit;color:#e6edf7;background:#17263b;padding:8px;border:1px solid #3c566f;border-radius:6px}}label{{display:block;margin:20px 0}}.hidden{{display:none}}footer{{margin-top:40px;color:#8ca1bc}}
