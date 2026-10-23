@@ -15,7 +15,6 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-
 SCRIPT = r"""
 const spec = arguments[0];
 const select = document.getElementById(spec.select);
@@ -35,7 +34,8 @@ for (const label of spec.labels) {
         if (!sectors || document.querySelectorAll('#sectors tr').length !== sectors)
             throw new Error('Sector attribution missing or selected another scenario');
     } else {
-        const rows = Array.from(document.querySelectorAll(spec.rows)).filter(r => getComputedStyle(r).display !== 'none');
+        const rows = Array.from(document.querySelectorAll(spec.rows))
+            .filter(r => getComputedStyle(r).display !== 'none');
         if (!rows.length || rows.some(r => JSON.parse(r.dataset[spec.attribute]) !== label))
             throw new Error('Empty or incorrect filtered result: ' + JSON.stringify(label));
     }
@@ -83,10 +83,18 @@ def browser_check(cases, root):
                 time.sleep(0.1)
         else:
             raise RuntimeError("chromedriver did not become ready")
-        session = call("POST", "/session", {"capabilities": {"alwaysMatch": {
-            "browserName": "chrome",
-            "goog:chromeOptions": {"args": ["--headless=new", "--no-sandbox", "--disable-dev-shm-usage"]},
-        }}})["sessionId"]
+        session = call(
+            "POST",
+            "/session",
+            {
+                "capabilities": {
+                    "alwaysMatch": {
+                        "browserName": "chrome",
+                        "goog:chromeOptions": {"args": ["--headless=new", "--no-sandbox", "--disable-dev-shm-usage"]},
+                    }
+                }
+            },
+        )["sessionId"]
         selections = 0
         for case in cases:
             call("POST", f"/session/{session}/url", {"url": (root / case["file"]).as_uri()})
@@ -113,8 +121,18 @@ def main():
     with tempfile.TemporaryDirectory() as temporary:
         root = Path(temporary).resolve()
         (root / "report.html").write_text(rolling_artifacts(data)["report.html"], encoding="utf-8")
-        browser_check([{"file": "report.html", "select": "decision", "rows": "tr[data-decision]",
-                        "attribute": "decision", "labels": labels}], root)
+        browser_check(
+            [
+                {
+                    "file": "report.html",
+                    "select": "decision",
+                    "rows": "tr[data-decision]",
+                    "attribute": "decision",
+                    "labels": labels,
+                }
+            ],
+            root,
+        )
 
 
 if __name__ == "__main__":
