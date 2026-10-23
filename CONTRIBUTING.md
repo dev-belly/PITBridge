@@ -103,3 +103,12 @@ Use synthetic or appropriately licensed public records in examples and issues;
 do not upload private borrower or bank records. Proposed benchmarks must
 include reproducible commands, data size and hardware details. Contributions
 are covered by the repository's [MIT license](LICENSE).
+
+## Browser selector check
+
+The `Chrome report selectors` CI job uses the Ubuntu runner's installed Chrome
+and matching chromedriver to select CR/LF, NUL and Unicode identities in the
+actual report. `python scripts/check_browser.py` reproduces the check where
+Chrome and chromedriver are installed; `CHROMEWEBDRIVER` can name the driver's
+directory. No extra Python dependency is required. HTML-parser regressions
+remain part of the ordinary unit suite on every platform.
