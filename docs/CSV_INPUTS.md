@@ -1,8 +1,8 @@
 # Import CSV tables without pandas
 
-The installed package on `main` reads UTF-8 CSV tables using Python's standard
-library. This importer was added after v0.1.0. Use the README's `main` install
-instructions; the v0.1.0 tag does not have `--csv-dir`.
+PITBridge v0.2.0 reads UTF-8 CSV tables using Python's standard library.
+Use the README's [checked release installation](../README.md#install-the-checked-release)
+or its source instructions. The v0.1.0 tag does not have `--csv-dir`.
 
 ## Scalar snapshots
 
@@ -61,37 +61,7 @@ reads only its three named files.
 | `revision` | Decimal digits for an integer in `[1, 2^63-1]`; never parsed through float |
 | Numeric cells | Decimal or scientific notation; no surrounding whitespace, underscores, thousands separators, `NaN` or infinity |
 | All timestamps | Timezone-aware ISO-8601; normalized to UTC; naive dates/times fail |
-| Encoding and records | UTF-8, optional BOM, LF or CRLF; unquoted whitespace-only records are skipped |
-| Quoted identifiers | CSV quoting preserves commas, embedded newlines and interior blank lines |
-
-Integer numeric cells are retained exactly in normalized `inputs.json`; the
-feature engine converts active values to finite binary64. Computation can
-round integers above `2^53`. Decimal/scientific cells are parsed as binary64.
-CSV intake does not provide exact monetary arithmetic or unit conversion.
-
-Header-only observations are valid and preserve `no_history`; at least one
-decision and one scalar/rolling specification remain required. Duplicate IDs,
-logical revisions, undeclared source/features and duplicate output names fail
-under the same contracts as JSON input. The importer does not fill missing
-features with zero, drop malformed rows or repair dates.
-
-Wrong field counts, malformed quoting and row conversion errors name the file
-and physical end line of the CSV record, including multi-line records.
-Cross-table identity errors name the violated contract. A failed import exits
-with status 2 on stderr and creates no output directory; an existing report
-is untouched by an input-validation failure. Successful report commands can
-replace files, so use a separate output directory per trial.
-
-`--inputs` and `--csv-dir` are mutually exclusive. The Python equivalent is:
-
-```python
-from pitbridge import load_csv_inputs
-from pitbridge.bundle import write_bundle
-
-data = load_csv_inputs("my-tables")
-write_bundle(data, "outputs/csv")
-# For rolling tables: load_csv_inputs("my-tables", rolling=True),
-# then pitbridge.rolling_bundle.write_rolling_bundle(data, output).
+| En…419 tokens truncated…ndle.write_rolling_bundle(data, output).
 ```
 
 Both report formats retain the existing normalized JSON inputs and independent

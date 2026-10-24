@@ -131,7 +131,21 @@ jobs:
       - name: Install without a package index and replay outside the source tree
         env:
           PYTHONUTF8: '0'
-        run: python scripts/check_distribution.py dist
+        run: python scripts/check_distribution.py dist --output installed-check.json
+      - name: Prepare the exact distributions that passed installation and replay
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        env:
+          BUILD_SHA: ${{ github.sha }}
+        shell: bash
+        run: python scripts/release_artifacts.py prepare dist installed-check.json release --commit "$BUILD_SHA"
+      - name: Retain the checked release assets
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: checked-distributions
+          path: release/*
+          if-no-files-found: error
+          retention-days: 30
 
   browser:
     name: Chrome report selectors

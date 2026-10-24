@@ -4,7 +4,7 @@
 
 **核心问题：做出信贷决策时，银行当时到底能看到哪个版本的数据？**
 
-[浏览器里试一张发票（Colab）](https://colab.research.google.com/github/dev-belly/PITBridge/blob/main/examples/decision_time.ipynb) · [本地案例](examples/README.md#a-correction-that-arrives-later) · [从 CSV 表格开始](examples/README.md#optional-pandascsv-input) · [在线报告](https://dev-belly.github.io/PITBridge/) · [提交试用反馈](https://github.com/dev-belly/PITBridge/issues/new?template=trial_feedback.md)
+[浏览器里试一张发票（Colab）](https://colab.research.google.com/github/dev-belly/PITBridge/blob/main/examples/decision_time.ipynb) · [本地案例](examples/README.md#a-correction-that-arrives-later) · [从 CSV 表格开始](docs/CSV_INPUTS.md) · [在线报告](https://dev-belly.github.io/PITBridge/) · [提交试用反馈](https://github.com/dev-belly/PITBridge/issues/new?template=trial_feedback.md)
 
 Notebook 使用 **dev-belly/PITBridge** 的完整源码 URL，固定到一个提交版本，无需克隆。
 修改决策或入库时间，即可查看当时应选择哪个发票版本。
@@ -21,9 +21,9 @@ PITBridge 同时处理数据发生时间、公开时间、入库时间和修订�
 
 需要 Git 和 Python 3.11 或更高版本。下面是 Windows PowerShell 命令，使用独立环境，无需先激活：
 
-这些命令克隆 `main`。[v0.1.0 发布版本](https://github.com/dev-belly/PITBridge/releases/tag/v0.1.0)
-是较早的代码快照；可选 CSV 示例和 `benchmark` 命令均在[该标签之后加入](https://github.com/dev-belly/PITBridge/compare/v0.1.0...main)。
-试用这些功能请使用 `main`；若选择发布标签，请按该版本自己的说明运行。
+这些命令克隆 `main` 以运行源码示例。固定安装可使用下面的 v0.2.0 wheel，
+其中已包含内置 CSV 接入、滚动特征和 `benchmark` 命令。
+较早的 v0.1.0 标签不包含内置 CSV 接入和 benchmark。
 
 ```powershell
 git clone https://github.com/dev-belly/PITBridge.git
@@ -40,6 +40,23 @@ Linux / macOS 用 `python3 -m venv .venv` 创建环境，并将上述 `.\.venv\S
 打开 `outputs/report.html` 即可查看离线报告。无第三方运行依赖，安装与示例在 Linux 和 Windows CI 中检查。
 仓库用 `.gitattributes` 保留 LF 换行；Windows Git 开启 `core.autocrlf=true` 时，已保存的快照和滚动报告也保持原哈希。
 
+## 安装经过检查的发布版
+
+无需 Git，Windows PowerShell 可直接安装本仓库的 wheel：
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install "https://github.com/dev-belly/PITBridge/releases/download/v0.2.0/pitbridge-0.2.0-py3-none-any.whl"
+.\.venv\Scripts\python.exe -m pitbridge demo --out outputs
+.\.venv\Scripts\python.exe -m pitbridge verify --out outputs
+```
+
+[发布页面](https://github.com/dev-belly/PITBridge/releases/tag/v0.2.0)同时提供源码包、
+安装核验记录、固定提交号的发布清单和 SHA-256 校验值。wheel 从源码包构建，
+在离开源码目录的干净环境中检查四条 JSON/CSV 路径与小规模 benchmark；
+完整主分支 CI（包括 Windows、pandas 和 Chrome）通过后才发布同一份产物。
+[升级与重放边界](docs/releases/v0.2.0.md) · [复现发布检查](docs/RELEASING.md)。
+
 ## 可直接复用的 Python 案例
 
 [decision_time.py](examples/decision_time.py) 用两个版本的合成开票记录，展示同一个一月份业务时点在不同决策日的结果：
@@ -55,14 +72,18 @@ Linux / macOS 用 `python3 -m venv .venv` 创建环境，并将上述 `.\.venv\S
 
 ## 从 CSV 表格试用
 
-已经有表格时，可运行已合并的 pandas 适配示例。pandas 单独安装，核心包不依赖它：
+已有表格可直接使用内置命令，无需 pandas：
 
 ```powershell
-.\.venv\Scripts\python.exe -m pip install "pandas>=2,<4"
-.\.venv\Scripts\python.exe examples/pandas_csv.py
+.\.venv\Scripts\python.exe -m pitbridge build --csv-dir examples/csv --out outputs/csv
+.\.venv\Scripts\python.exe -m pitbridge verify --out outputs/csv
 ```
 
-示例读取 `examples/csv/` 的三份合成表格，输出同样的三条记录：尚未可用、`invoice-v1`（100,000）、`invoice-v2`（135,000）。它保留有时区的时间、整数修订、撤销标记和显式缺失，并逐字段与独立 Python 实现核对；不把缺失值填成零。[字段规则和替换自己的表格](examples/README.md#optional-pandascsv-input)。
+源码示例读取 `examples/csv/` 的三份合成表格，输出同样的三条记录：尚未可用、`invoice-v1`（100,000）、`invoice-v2`（135,000）。
+只安装 wheel 时，将 `examples/csv` 换成自己的三表目录。
+严格检查表头、行宽、带时区时间、整数修订、撤销标记和显式缺失；不把缺失值填成零。
+[字段规则和滚动表格](docs/CSV_INPUTS.md)。需要 DataFrame 时仍可选择
+[单独安装 pandas 的示例](examples/README.md#optional-pandascsv-input)。
 
 试用后可[反馈卡住的步骤或实际选择结果](https://github.com/dev-belly/PITBridge/issues/new?template=trial_feedback.md)，帮助补充适配器、文档和反例。
 
