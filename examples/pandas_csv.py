@@ -10,13 +10,19 @@ from pitbridge import Decision, FeatureSpec, Observation, build_snapshot, refere
 
 
 FIXTURE = Path(__file__).parent / "csv"
+_NUMBER = re.compile(r"[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?\Z")
 
 
 def revision_value(value):
     # Never round a revision through binary64, or accept bool as an integer.
     if not isinstance(value, str) or re.fullmatch(r"[0-9]+", value) is None:
         raise ValueError("revision must be a positive int64 integer (decimal digits)")
-    revision = int(value)
+    # Leading zeroes do not change the value. Bound significant digits before
+    # int() so long CSV cells keep the same contract on every Python version.
+    significant = value.lstrip("0")
+    if not significant or len(significant) > 19:
+        raise ValueError("revision must be a positive int64 integer")
+    revision = int(significant)
     if not 1 <= revision <= 2**63 - 1:
         raise ValueError("revision must be a positive int64 integer")
     return revision
@@ -30,9 +36,15 @@ def deleted_value(value):
     raise ValueError("deleted must be true or false")
 
 
-def optional_number(value):
+def optional_number(value, name):
     # Only an empty CSV cell means null; NA-like text is not missing data.
-    return None if value == "" else float(value)
+    if value == "":
+        return None
+    # float() also accepts underscores, whitespace and non-ASCII digits. Keep
+    # this example's numeric text contract aligned with the native CSV importer.
+    if not isinstance(value, str) or not _NUMBER.fullmatch(value):
+        raise ValueError(f"{name} must be a decimal number or an empty cell")
+    return float(value)
 
 
 def load_inputs(directory=FIXTURE):
@@ -83,9 +95,9 @@ def load_inputs(directory=FIXTURE):
                 if cls is Observation:
                     fields["revision"] = revision_value(fields["revision"])
                     fields["deleted"] = deleted_value(fields["deleted"])
-                    fields["value"] = optional_number(fields["value"])
+                    fields["value"] = optional_number(fields["value"], "value")
                 elif cls is FeatureSpec:
-                    fields["max_age_days"] = optional_number(fields["max_age_days"])
+                    fields["max_age_days"] = optional_number(fields["max_age_days"], "max_age_days")
                 # Dataclasses validate timestamps, identifiers and missing values.
                 converted.append(cls(**fields))
             except (ValueError, TypeError) as exc:

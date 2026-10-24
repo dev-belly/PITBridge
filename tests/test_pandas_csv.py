@@ -8,7 +8,8 @@ import runpy
 import tempfile
 import unittest
 
-from pitbridge import build_snapshot, reference_snapshot
+from pitbridge import build_snapshot, load_csv_inputs, reference_snapshot
+from pitbridge.bundle import decode_inputs
 
 
 EXAMPLES = Path(__file__).resolve().parents[1] / "examples"
@@ -23,6 +24,16 @@ class RevisionTests(unittest.TestCase):
         for value in ("", "1.0", "1.5", "1e3", "NaN", "inf", "true",
                       "-1", "0", " 1", str(2**63), True, 1, 1.0):
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, "revision"):
+                convert(value)
+
+    def test_long_revisions_keep_the_int64_contract(self):
+        convert = adapter["revision_value"]
+        for value in (1, 2**53 + 1, 2**63 - 1):
+            with self.subTest(value=value):
+                self.assertEqual(convert("0" * 5000 + str(value)), value)
+        for value in ("0" * 5000, "9" * 5000, "0" * 5000 + str(2**63)):
+            with self.subTest(value=value[-20:]), self.assertRaisesRegex(
+                    ValueError, "revision must be a positive int64 integer"):
                 convert(value)
 
 
@@ -70,6 +81,31 @@ class PandasCSVTests(unittest.TestCase):
         self.tables["observations"][1]["revision"] = str(2**63 - 1)
         self.assertEqual(self.snapshots()[-1].revision, 2**63 - 1)
 
+    def test_numeric_text_is_validated_before_conversion(self):
+        for table, column in (("observations", "value"), ("specs", "max_age_days")):
+            original = self.tables[table][0][column]
+            for value in ("1_0", " 10", "10 ", "\t10", "\uff11\uff10", "\u0661\u0660",
+                          "1,000", "0x10", "true", "NA", "NULL", "NaN", "inf", "1e1000"):
+                self.tables[table][0][column] = value
+                with self.subTest(table=table, value=value):
+                    with self.assertRaisesRegex(
+                            ValueError, rf"{table}\.csv row 2: .*{column}"):
+                        self.load()
+                    with self.assertRaises(ValueError):
+                        load_csv_inputs(self.directory)
+            self.tables[table][0][column] = original
+
+    def test_decimal_and_scientific_values_match_native_csv(self):
+        self.tables["specs"][0]["max_age_days"] = "9e1"
+        for text, expected in (("0", 0.0), ("-0", -0.0), ("+0012", 12.0),
+                               ("-12.5", -12.5), (".5", 0.5), ("1.", 1.0),
+                               ("1e3", 1000.0), ("2.5E+2", 250.0), ("1e-3", 0.001)):
+            self.tables["observations"][0]["value"] = text
+            with self.subTest(value=text):
+                rows = self.snapshots()
+                self.assertEqual(rows[1].value, expected)
+                self.assertEqual(rows, build_snapshot(*decode_inputs(load_csv_inputs(self.directory))))
+
     def test_tombstone_does_not_restore_previous_revision(self):
         self.tables["observations"][1].update(deleted="true", value="")
         rows = self.snapshots()
@@ -95,8 +131,8 @@ class PandasCSVTests(unittest.TestCase):
                               ({"revision": ""}, "revision"),
                               ({"deleted": "yes"}, "deleted"),
                               ({"value": ""}, "active observations"),
-                              ({"value": "NA"}, "convert string"),
-                              ({"value": "nan"}, "finite"),
+                              ({"value": "NA"}, "decimal number"),
+                              ({"value": "nan"}, "decimal number"),
                               ({"deleted": "true"}, "tombstone"),
                               ({"event_at": "2026-01-31"}, "naive timestamps")):
             self.tables["observations"][0] = original | fields
