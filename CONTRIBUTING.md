@@ -115,3 +115,7 @@ actual report. `python scripts/check_browser.py` reproduces the check where
 Chrome and chromedriver are installed; `CHROMEWEBDRIVER` can name the driver's
 directory. No extra Python dependency is required. HTML-parser regressions
 remain part of the ordinary unit suite on every platform.
+The initial Chrome session has a 60-second cold-start limit; ordinary page and
+script commands retain 15 seconds. Driver startup output is kept in the job log
+to distinguish browser launch problems from a failed report assertion. Assertions
+are not retried or skipped after a startup failure.
