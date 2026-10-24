@@ -71,11 +71,21 @@ quoting before creating a string DataFrame; errors name the file and physical en
 line of the CSV record. UTF-8 BOMs, quoted commas and multi-line fields remain
 supported; unquoted blank or whitespace-only records are ignored. Text cells preserve
 identifiers such as `NA` and exact integer revisions, including values above `2^53`.
-Revisions require decimal digits in `[1, 2^63-1]`; fractional, scientific and
-boolean representations are rejected. `deleted` requires literal `true` or
-`false`. An empty `value` cell means null and is valid only for a tombstone;
-an empty `max_age_days` means no freshness limit. Missing features retain their
-status and null value; they are never filled with zero.
+Conversion validates the CSV representation before constructing the public dataclasses:
+
+| Column | Accepted CSV cells | Rejected examples |
+| :--- | :--- | :--- |
+| `revision` | Decimal digits in `[1, 2^63-1]`, with optional leading zeroes; never passed through float | Empty, `1.0`, `1.5`, `1e3`, `true`, out-of-range integers |
+| `deleted` | Exactly lowercase `true` or `false` | Empty, `yes`, `1`, `0`; Python truthiness is never used |
+| `value` | Finite ASCII decimal/scientific numbers; an empty cell only for a tombstone | `1_000`, `1,000`, surrounding whitespace, non-ASCII digits, `NA`, `NaN`, infinity |
+| `max_age_days` | The same numeric syntax within `[0, 3652500]`; an empty cell means no freshness limit | Negative/nonfinite values or malformed numeric text |
+
+These numeric text rules match the [native CSV importer](../docs/CSV_INPUTS.md#parsing-rules).
+The optional example converts feature values directly to binary64; the native importer
+also retains integer source values in its normalized JSON. Missing features retain their
+status and null value; they are never filled with zero. The tests compare full snapshots
+with the Python example and reference engine, exercise malformed cells, and check accepted
+decimal/scientific values against native CSV intake.
 
 Timezone-aware strings go directly to the public dataclasses for validation
 and UTC normalization. A naive timestamp raises `naive timestamps are forbidden;
