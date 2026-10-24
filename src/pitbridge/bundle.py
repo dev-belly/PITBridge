@@ -135,6 +135,8 @@ def write_bundle(data, out):
     target.mkdir(parents=True, exist_ok=True)
     for name, content in files.items():
         (target / name).write_text(content, encoding="utf-8", newline="")
+    # This legacy string identifies the scalar bundle format, not the package
+    # version. A package release must not relabel or invalidate saved bundles.
     manifest = {"schema_version": 1, "engine": "pitbridge/0.1.0", "files": {name: sha256(content.encode()).hexdigest() for name, content in sorted(files.items())}}
     (target / "manifest.json").write_text(canonical(manifest), encoding="utf-8")
     return read_json(target / "summary.json")

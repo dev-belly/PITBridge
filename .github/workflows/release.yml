@@ -1,0 +1,60 @@
+name: Publish checked release
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: checked-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download the distributions tested by the exact successful main CI run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CHECKED_RUN: ${{ github.event.workflow_run.id }}
+          CHECKED_REPOSITORY: ${{ github.repository }}
+        run: gh run download "$CHECKED_RUN" --repo "$CHECKED_REPOSITORY" --name checked-distributions --dir release
+      - name: Verify the commit, version, metadata, replay evidence and every digest
+        env:
+          CHECKED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: python scripts/release_artifacts.py verify release --commit "$CHECKED_SHA"
+      - name: Publish a new version without replacing an existing release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CHECKED_SHA: ${{ github.event.workflow_run.head_sha }}
+          CHECKED_REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          release_tag=$(python -c "import json; print('v'+json.load(open('release/release-manifest.json'))['version'])")
+          if gh release view "$release_tag" --repo "$CHECKED_REPOSITORY" --json tagName >/dev/null 2>&1; then
+            printf 'Release %s already exists; bump the version for another release.\n' "$release_tag"
+            exit 0
+          fi
+          notes_file="docs/releases/${release_tag}.md"
+          test -s "$notes_file"
+          gh release create "$release_tag" release/*.whl release/*.tar.gz release/*.json release/*.sha256 \
+            --repo "$CHECKED_REPOSITORY" --target "$CHECKED_SHA" \
+            --title "PITBridge $release_tag" --notes-file "$notes_file"

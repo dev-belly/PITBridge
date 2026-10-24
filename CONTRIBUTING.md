@@ -66,6 +66,9 @@ checks still run separately.
 
 On Windows, substitute `.\.venv\Scripts\python.exe` as above. The script cleans
 up its temporary environment and reports; it never replaces saved evidence.
+It also checks distribution/runtime versions and runs two small installed
+benchmark trials. [Release preparation](docs/RELEASING.md) retains this evidence
+alongside the exact wheel and source archive.
 
 ## Where to work
 
