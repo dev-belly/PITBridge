@@ -57,7 +57,7 @@ def browser_check(cases, root):
         port = available.getsockname()[1]
     address = f"http://127.0.0.1:{port}"
 
-    def call(method, endpoint, payload=None):
+    def call(method, endpoint, payload=None, *, timeout=15):
         request = urllib.request.Request(
             address + endpoint,
             data=json.dumps(payload).encode() if payload is not None else None,
@@ -65,13 +65,13 @@ def browser_check(cases, root):
             method=method,
         )
         try:
-            with urllib.request.urlopen(request, timeout=15) as response:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
                 return json.load(response)["value"]
         except urllib.error.HTTPError as error:
             raise RuntimeError(error.read().decode()) from error
 
     session = None
-    process = subprocess.Popen([driver, f"--port={port}"], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+    process = subprocess.Popen([driver, f"--port={port}"], stderr=subprocess.STDOUT)
     try:
         for _ in range(50):
             try:
@@ -94,6 +94,9 @@ def browser_check(cases, root):
                     }
                 }
             },
+            # A busy hosted runner may need longer for Chrome's first startup.
+            # Page operations and selector assertions keep their shorter limit.
+            timeout=60,
         )["sessionId"]
         selections = 0
         for case in cases:
