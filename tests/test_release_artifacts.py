@@ -29,6 +29,11 @@ class ReleaseArtifactTests(unittest.TestCase):
         self.result = {
             "status": "verified",
             "version": self.version,
+            "timestamp_precision": {
+                "cutoff_and_late_microsecond": True,
+                "json_and_csv_rejections": 4,
+                "no_reports_on_rejection": True,
+            },
             "scalar": scalar,
             "rolling": rolling,
             "csv": {"scalar": scalar, "rolling": rolling},
@@ -121,6 +126,26 @@ class ReleaseArtifactTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "digests differ"):
             self.prepare()
         self.assertFalse(self.destination.exists())
+
+    def test_missing_or_false_installed_precision_evidence_prevents_publication(self):
+        original = copy.deepcopy(self.result)
+        for field, value in (
+            (None, None),
+            ("cutoff_and_late_microsecond", False),
+            ("json_and_csv_rejections", 3),
+            ("json_and_csv_rejections", True),
+            ("no_reports_on_rejection", False),
+        ):
+            self.result = copy.deepcopy(original)
+            if field is None:
+                self.result.pop("timestamp_precision")
+            else:
+                self.result["timestamp_precision"][field] = value
+            self.write_check()
+            with self.subTest(field=field, value=value):
+                with self.assertRaisesRegex(ValueError, "timestamp-precision"):
+                    self.prepare()
+                self.assertFalse(self.destination.exists())
 
     def test_wrong_distribution_metadata_prevents_publication(self):
         for kwargs in (

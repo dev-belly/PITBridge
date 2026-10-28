@@ -35,9 +35,10 @@ dependencies**. The commands use a virtual environment without requiring
 activation.
 
 These commands clone `main` for the source examples. For a fixed installation
-without Git, use the [checked v0.2.0 wheel](#install-the-checked-release).
-v0.2.0 includes the installed CSV importer, rolling features and `benchmark`;
-the earlier v0.1.0 tag lacks the CSV importer and benchmark.
+without Git, use the [checked v0.2.1 wheel](#install-the-checked-release).
+v0.2.1 includes the installed CSV importer, rolling features and `benchmark`,
+and rejects unsupported timestamp precision before selection; the earlier
+v0.1.0 tag lacks the CSV importer and benchmark.
 
 **Linux / macOS**
 
@@ -81,21 +82,21 @@ Install this repository's wheel directly, using its full URL:
 
 ```bash
 python3 -m venv .venv
-.venv/bin/python -m pip install "https://github.com/dev-belly/PITBridge/releases/download/v0.2.0/pitbridge-0.2.0-py3-none-any.whl"
+.venv/bin/python -m pip install "https://github.com/dev-belly/PITBridge/releases/download/v0.2.1/pitbridge-0.2.1-py3-none-any.whl"
 .venv/bin/python -m pitbridge demo --out outputs
 .venv/bin/python -m pitbridge verify --out outputs
 ```
 
 On Windows, create the environment with `python -m venv .venv` and substitute
 `.\.venv\Scripts\python.exe` for `.venv/bin/python`.
-The [release page](https://github.com/dev-belly/PITBridge/releases/tag/v0.2.0)
+The [release page](https://github.com/dev-belly/PITBridge/releases/tag/v0.2.1)
 also provides the source archive, `installed-check.json`, an exact-commit
 `release-manifest.json` and `CHECKSUMS.sha256`. The wheel is built from the
 source archive, installed in a fresh environment outside the checkout and
-used for scalar/rolling JSON and CSV replay plus a small benchmark. Publishing
+used for scalar/rolling JSON and CSV replay, timestamp-precision checks and a small benchmark. Publishing
 waits for the complete main CI, including Windows, pandas and Chrome jobs;
 the publisher verifies the exact CI artifacts instead of rebuilding them.
-[Release notes and replay compatibility](docs/releases/v0.2.0.md) ·
+[Release notes and replay compatibility](docs/releases/v0.2.1.md) ·
 [Reproduce the release checks](docs/RELEASING.md).
 
 ## Use the Python API

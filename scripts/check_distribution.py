@@ -12,6 +12,7 @@ import tempfile
 import tomllib
 import venv
 from pathlib import Path
+from textwrap import dedent
 
 
 def check(directory: Path) -> dict:
@@ -73,6 +74,118 @@ def check(directory: Path) -> dict:
                 "Installed distribution/runtime version differs from the source version"
             )
         run(str(python), "-I", "-m", "pitbridge", "--help")
+
+        # An arrival just after a decision must never be rounded into visibility.
+        # Exercise the actual installed package, not the source checkout.
+        boundary = json.loads(
+            run(
+                str(python),
+                "-I",
+                "-c",
+                dedent("""
+                    import json
+                    from pitbridge import Decision, FeatureSpec, Observation, build_snapshot
+                    from pitbridge.rolling import RollingSpec, build_rolling
+
+                    cutoff = "2026-01-01T00:00:00Z"
+                    decision = [Decision("d", "e", cutoff)]
+                    scalar_spec = [FeatureSpec("s", "f", 1)]
+                    rolling_spec = [RollingSpec("total", "s", "f", 1)]
+                    for ingestion, available in (
+                        (cutoff, True), ("2026-01-01T00:00:00.000001Z", False)
+                    ):
+                        obs = [Observation("r", "e", "s", "f", cutoff, cutoff,
+                                           ingestion, 1, 10)]
+                        scalar = build_snapshot(obs, decision, scalar_spec)[0]
+                        rolling, members = build_rolling(obs, decision, rolling_spec)
+                        if ((scalar.record_id == "r") != available
+                            or (len(members) == 1) != available
+                            or (rolling[0].status != "not_available") != available):
+                            raise ValueError("Incorrect installed cutoff selection")
+                    print(json.dumps({"cutoff_and_late_microsecond": True}))
+                """),
+            )
+        )
+
+        cutoff = "2026-01-01T00:00:00Z"
+        late = "2026-01-01T00:00:00.0000009Z"
+        for command, spec in (("build", "specs"), ("aggregate", "rolling_specs")):
+            case = {
+                "observations": [
+                    {
+                        "record_id": "r",
+                        "entity_id": "e",
+                        "source": "s",
+                        "feature": "f",
+                        "event_at": cutoff,
+                        "published_at": cutoff,
+                        "ingested_at": late,
+                        "revision": 1,
+                        "value": 10,
+                        "deleted": False,
+                    }
+                ],
+                "decisions": [
+                    {"decision_id": "d", "entity_id": "e", "decision_at": cutoff}
+                ],
+                spec: (
+                    [{"source": "s", "feature": "f", "max_age_days": 1}]
+                    if command == "build"
+                    else [
+                        {
+                            "name": "total",
+                            "source": "s",
+                            "feature": "f",
+                            "window_days": 1,
+                            "aggregation": "sum",
+                        }
+                    ]
+                ),
+            }
+            inputs = work / f"precision-{command}.json"
+            inputs.write_text(json.dumps(case), encoding="utf-8")
+            tables = work / f"precision-{command}-tables"
+            tables.mkdir()
+            for section, rows in case.items():
+                with (tables / f"{section}.csv").open(
+                    "w", encoding="utf-8", newline=""
+                ) as handle:
+                    writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+                    writer.writeheader()
+                    writer.writerows(
+                        {
+                            key: str(value).lower()
+                            if isinstance(value, bool)
+                            else value
+                            for key, value in row.items()
+                        }
+                        for row in rows
+                    )
+            for route, source in (("--inputs", inputs), ("--csv-dir", tables)):
+                output = work / f"precision-{command}-{route[2:]}-output"
+                result = subprocess.run(
+                    (str(cli), command, route, str(source), "--out", str(output)),
+                    cwd=work,
+                    env=environment,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    capture_output=True,
+                    check=False,
+                )
+                if (
+                    result.returncode != 2
+                    or result.stdout
+                    or output.exists()
+                    or "microsecond precision" not in result.stderr
+                    or "Traceback" in result.stderr
+                ):
+                    raise ValueError(
+                        f"Installed {command} {route} did not reject excess precision"
+                    )
+        if boundary != {"cutoff_and_late_microsecond": True}:
+            raise ValueError("Installed package changed supported cutoff semantics")
+
         run(str(cli), "demo", "--out", "scalar")
         scalar = json.loads(run(str(cli), "verify", "--out", "scalar"))
         run(str(cli), "rolling-demo", "--out", "rolling")
@@ -138,6 +251,11 @@ def check(directory: Path) -> dict:
             "python": sys.version.split()[0],
             "platform": sys.platform,
             "installation": "non-editable wheel; clean venv; cwd outside the source tree",
+            "timestamp_precision": {
+                "cutoff_and_late_microsecond": True,
+                "json_and_csv_rejections": 4,
+                "no_reports_on_rejection": True,
+            },
             "scalar": scalar,
             "rolling": rolling,
             "csv": csv_results,

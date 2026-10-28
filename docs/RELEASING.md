@@ -6,8 +6,10 @@ the wheel without a package index into a fresh virtual environment. From a
 directory outside the checkout it verifies package/runtime versions, generates
 and semantically replays scalar/rolling JSON and CSV bundles, compares the CSV
 results, and runs two 2,000-observation benchmark trials with the independent
-oracle. The benchmark is an installation smoke check, not a release performance
-claim.
+oracle. The installed wheel also checks exact-cutoff versus one-microsecond-late
+selection and rejects a seventh digit on all four scalar/rolling JSON/CSV CLI
+routes before creating a report. The benchmark is an installation smoke check,
+not a release performance claim.
 
 To reproduce from a clean checkout with no stale files in `dist` or `release`:
 
