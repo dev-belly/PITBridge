@@ -4,7 +4,7 @@
 
 An observation has event time `e`, publication time `p`, ingestion time `i`, and availability `a = max(p, i)`. This assumes both public release and ingestion are necessary for the decision system to use the record. It also supports pre-ingested embargoed records: ingestion alone does not make them eligible.
 
-For decision time `t`, the eligible set requires `e <= t` and `a <= t`. All instants are normalized to UTC at microsecond precision. Equality is inclusive. The contract rejects naive timestamps and publication/ingestion preceding the represented observation event.
+For decision time `t`, the eligible set requires `e <= t` and `a <= t`. All instants are normalized to UTC at microsecond precision. Inputs with more than six fractional-second digits or fractional-second UTC offsets are rejected before normalization, rather than silently moved to another instant. Equality is inclusive. The contract rejects naive timestamps and publication/ingestion preceding the represented observation event.
 
 The logical observation key is `(entity_id, source, feature, event_at)`. Within the eligible set, choose the largest positive source `revision`. A higher version remains authoritative even if a lower version was delivered later. Duplicate logical key/revision pairs are rejected rather than resolved by incidental row order.
 

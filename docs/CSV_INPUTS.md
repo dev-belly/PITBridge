@@ -60,7 +60,7 @@ reads only its three named files.
 | `deleted` | Exactly `true` or `false`, lowercase |
 | `revision` | Decimal digits for an integer in `[1, 2^63-1]`; never parsed through float |
 | Numeric cells | Decimal or scientific notation; no surrounding whitespace, underscores, thousands separators, `NaN` or infinity |
-| All timestamps | Timezone-aware ISO-8601; normalized to UTC; naive dates/times fail |
+| All timestamps | Timezone-aware ISO-8601 with at most six fractional-second digits and whole-second UTC offsets; normalized to UTC; naive dates/times and unsupported precision fail |
 | Encoding and records | UTF-8, optional BOM, LF or CRLF; unquoted whitespace-only records are skipped |
 | Quoted identifiers | CSV quoting preserves commas, embedded newlines and interior blank lines |
 
