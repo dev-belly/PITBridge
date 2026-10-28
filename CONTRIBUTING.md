@@ -109,7 +109,16 @@ are covered by the repository's [MIT license](LICENSE).
 
 ## Browser selector check
 
-The `Chrome report selectors` CI job uses the Ubuntu runner's installed Chrome
+The no-install invoice lesson lives in `site/try/index.html`. Its small browser
+mirror uses integer microseconds and a fixed two-revision fixture. With Node 22+
+available for these development checks, run `node scripts/check_trial.mjs` and
+`python scripts/check_trial.py`: the exact shipped script is compared with
+SQLite and the independent Python enumerator over 71 fixed/seeded cases. Node
+is not a package runtime dependency. The Chrome job also exercises all three
+presets, edited cutoff equality, one-microsecond delay, invalid precision,
+share-link state and page overflow at desktop and 390-pixel mobile widths.
+
+The `Chrome reports and no-install invoice lesson` CI job uses the Ubuntu runner's installed Chrome
 and matching chromedriver to select CR/LF, NUL and Unicode identities in the
 actual report. `python scripts/check_browser.py` reproduces the check where
 Chrome and chromedriver are installed; `CHROMEWEBDRIVER` can name the driver's

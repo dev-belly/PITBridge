@@ -5,7 +5,14 @@
 **Financial features as they were known when a decision was made.**
 
 [![CI](https://github.com/dev-belly/PITBridge/actions/workflows/ci.yml/badge.svg)](https://github.com/dev-belly/PITBridge/actions/workflows/ci.yml)
-[Run in Colab](https://colab.research.google.com/github/dev-belly/PITBridge/blob/main/examples/decision_time.ipynb) · [Try one invoice locally](examples/README.md#a-correction-that-arrives-later) · [Bring CSV tables](docs/CSV_INPUTS.md) · [Open the online report](https://dev-belly.github.io/PITBridge/) · [中文说明](README.zh-CN.md)
+[Try it now · no sign-in](https://dev-belly.github.io/PITBridge/try/) · [Python notebook](https://colab.research.google.com/github/dev-belly/PITBridge/blob/main/examples/decision_time.ipynb) · [Bring CSV tables](docs/CSV_INPUTS.md) · [Full report](https://dev-belly.github.io/PITBridge/) · [中文说明](README.zh-CN.md)
+
+**Change one arrival time and see which invoice revision survives.** The
+[30-second browser lesson](https://dev-belly.github.io/PITBridge/try/) runs
+without installation or an account. Compare a wrong event-only join with the
+decision-time result, then copy a link to your scenario. Its fixed synthetic
+case is checked against SQLite and the independent Python engine. To use your
+own data, continue with the Python API or strict CSV importer below.
 
 The notebook installs **dev-belly/PITBridge** from a full source URL pinned to one
 commit; no local checkout is needed. Change a decision or ingestion time to see
