@@ -1,6 +1,13 @@
 # Small, runnable examples
 
-Want to edit a timestamp without setting up a local checkout?
+Want to edit a timestamp without an account or installation? Start with the
+[live invoice lesson](https://dev-belly.github.io/PITBridge/try/). It keeps one
+fixed, synthetic two-revision case in your browser, supports exact microsecond
+cutoffs and copies shareable scenario links. CI checks 71 scenarios against
+both Python engines and exercises the visible desktop/mobile controls. This is
+a small teaching mirror; the package remains the full importer and verifier.
+
+To run the actual Python API without setting up a local checkout,
 [Open the invoice notebook in Colab](https://colab.research.google.com/github/dev-belly/PITBridge/blob/main/examples/decision_time.ipynb)
 or [inspect its source](decision_time.ipynb). It installs dev-belly/PITBridge from
 a full source URL pinned to one commit, checks the three fixed decisions, and

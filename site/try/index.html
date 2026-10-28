@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Change one invoice arrival time and see which historical revision a decision could know. A free, no-install PITBridge lesson with synthetic data.">
+  <title>PITBridge · Try the timing question</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0d131c;--panel:#151f2d;--ink:#edf1f5;--muted:#b7c3d2;--line:#344256;--green:#d7fa73;--red:#ffb5a7}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,sans-serif}main{max-width:1080px;margin:auto;padding:30px 26px 55px}
+    a{color:var(--green);text-underline-offset:4px}nav{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:14px}.brand{font-weight:800;letter-spacing:.09em;text-decoration:none}.eyebrow{margin:45px 0 10px;color:var(--green);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+    h1{font-size:clamp(33px,5.5vw,60px);line-height:1.1;letter-spacing:-.035em;max-width:850px;margin:12px 0 18px}h2{font-size:21px;line-height:1.3;margin:0 0 14px}p{margin:12px 0;color:var(--muted)}.intro{max-width:800px;font-size:18px}.badge{display:inline-block;border:1px solid var(--line);border-radius:20px;padding:3px 11px;font-size:12px;color:var(--muted)}
+    .presets{display:flex;gap:9px;flex-wrap:wrap;margin:26px 0 18px}button,.button{font:inherit;cursor:pointer;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);padding:10px 14px;text-decoration:none;display:inline-block}button:hover,.button:hover{border-color:var(--green)}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--green);outline-offset:3px}button:disabled{opacity:.5;cursor:default}.primary{background:var(--green);color:#131b0a;border-color:var(--green);font-weight:750}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;margin:20px 0}.fields{display:grid;grid-template-columns:1fr 1fr;gap:20px}label{display:block;font-weight:650;margin-bottom:7px}input{width:100%;min-width:0;color:var(--ink);background:#0d1521;border:1px solid #607089;border-radius:7px;padding:12px 10px;font:14px/1.4 ui-monospace,monospace}small{display:block;color:var(--muted);font-size:12px;margin-top:7px}.actions{display:flex;align-items:center;gap:13px;flex-wrap:wrap;margin-top:18px}.actions span{font-size:13px;color:var(--muted)}
+    .results{display:grid;grid-template-columns:1fr 1fr;gap:18px}.result{border:1px solid var(--line);border-radius:12px;padding:22px}.result.safe{border-color:#768d43;background:#1a251b}.result.unsafe{background:#261b1b;border-color:#79524c}.result-label{text-transform:uppercase;letter-spacing:.08em;font-size:11px;color:var(--muted)}.amount{font-size:clamp(26px,4vw,40px);font-weight:750;line-height:1.2;margin:10px 0}.safe .amount{color:var(--green)}.unsafe .amount{color:var(--red)}.reason{min-height:50px;font-size:14px;margin-bottom:0}.status{font:12px ui-monospace,monospace;overflow-wrap:anywhere}.error{color:var(--red);border-left:3px solid var(--red);padding:12px 15px;background:#291c20}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:500}td{overflow-wrap:anywhere}.time{font-family:ui-monospace,monospace;font-size:12px;max-width:220px}.availability{color:var(--green)}.after{color:var(--red)}.foot{font-size:13px;max-width:900px}footer{border-top:1px solid var(--line);margin-top:35px;padding-top:25px}code{overflow-wrap:anywhere}[hidden]{display:none!important}
+    @media(max-width:650px){main{padding:22px 17px 38px}.eyebrow{margin-top:30px}.fields,.results{grid-template-columns:1fr}.panel{padding:18px}.intro{font-size:16px}.presets button{flex:1;min-width:125px}th,td{padding:9px 7px}.reason{min-height:0}}
+  </style>
+</head>
+<body><main>
+  <nav aria-label="Main navigation"><a class="brand" href="https://github.com/dev-belly/PITBridge">PITBRIDGE</a><span><a href="../">Full snapshot report</a> · <a href="https://github.com/dev-belly/PITBridge/blob/main/examples/decision_time.py">Python example</a></span></nav>
+  <p class="eyebrow">A 30-second financial data lesson</p>
+  <h1>A correction arrived later.<br>Could your earlier decision use it?</h1>
+  <p class="intro">One invoice. Two revisions. Change a timestamp and inspect what was actually known. The wrong event-date join is shown beside the availability-aware result.</p>
+  <span class="badge">Synthetic CNY amounts</span> <span class="badge">No sign-in or installation</span>
+  <p lang="zh-CN">改一个入库时间，看历史决策能否使用这次更正。输入只在当前浏览器内计算。</p>
+  <div class="presets" aria-label="Example decisions">
+    <button type="button" data-preset="2026-02-01T00:00:00Z">1 · Before arrival</button>
+    <button type="button" data-preset="2026-02-15T00:00:00Z">2 · Original known</button>
+    <button type="button" data-preset="2026-04-15T00:00:00Z">3 · Correction known</button>
+  </div>
+  <form id="timing-form" class="panel">
+    <div class="fields">
+      <div><label for="decision-at">Decision time · UTC</label><input id="decision-at" name="decision" value="2026-02-15T00:00:00Z" spellcheck="false" autocomplete="off" aria-describedby="time-help"><small id="time-help">Use YYYY-MM-DDTHH:MM:SS[.ffffff]Z · up to six fractional digits.</small></div>
+      <div><label for="ingested-at">Correction ingestion · UTC</label><input id="ingested-at" name="ingested" value="2026-04-03T00:00:00Z" spellcheck="false" autocomplete="off"><small>Publication stays April 1. Availability is the later of publication and ingestion.</small></div>
+    </div>
+    <div class="actions"><button class="primary" type="submit">Compare decisions</button><button type="button" id="share">Copy this scenario</button><span id="share-status" role="status"></span></div>
+  </form>
+  <noscript><p class="error">Enable JavaScript for the editable lesson, or use the linked Python example and saved report.</p></noscript>
+  <p id="input-error" class="error" role="alert" hidden></p>
+  <section id="output" aria-label="Decision comparison" aria-live="polite" hidden>
+    <div class="results">
+      <article class="result safe"><div class="result-label">Availability-aware snapshot</div><div class="amount" id="safe-value"></div><div class="status" id="safe-record"></div><p class="reason" id="safe-reason"></p></article>
+      <article class="result unsafe"><div class="result-label">Wrong event-date-only join</div><div class="amount" id="unsafe-value"></div><div class="status" id="unsafe-record"></div><p class="reason" id="unsafe-reason"></p></article>
+    </div>
+    <section class="panel" aria-labelledby="trace-heading"><h2 id="trace-heading">Follow the two source records</h2><p class="foot">Both observations describe January 31. The freshness window is 90 × 24 hours, inclusive.</p><div class="table-wrap"><table><thead><tr><th scope="col">Revision</th><th scope="col">Value</th><th scope="col">Available at UTC</th><th scope="col">At this decision</th></tr></thead><tbody id="source-rows"></tbody></table></div><p class="foot">Original published February 5, ingested February 6. Correction published April 1; you control its ingestion. Revision 2 can replace revision 1 only after it is known.</p></section>
+  </section>
+  <footer><h2>Take the rule into your own pipeline</h2><p>Try your own tables with the <a href="https://github.com/dev-belly/PITBridge/blob/main/docs/CSV_INPUTS.md">three-CSV contract</a>, or run the <a href="https://colab.research.google.com/github/dev-belly/PITBridge/blob/main/examples/decision_time.ipynb">Python notebook</a>. <a href="https://github.com/dev-belly/PITBridge/issues/new?template=trial_feedback.md">Share a reproducible trial result</a>.</p><p>If this timing question helps your work, <a class="button" href="https://github.com/dev-belly/PITBridge">Star PITBridge</a> <a class="button" href="https://github.com/dev-belly">Follow dev-belly</a></p><p class="foot">This page mirrors one fixed, two-revision lesson; CI compares it with the Python/SQLite engine and independent enumerator. It is not the full importer or a credit decision tool. No data is uploaded. Shared links contain the two timestamps in the URL fragment. Synthetic examples do not establish customer outcomes or model accuracy.</p></footer>
+</main>
+<script id="invoice-fixture" type="application/json">
+{"observations":[{"record_id":"invoice-v1","entity_id":"SME-001","source":"tax","feature":"invoice_revenue","event_at":"2026-01-31T00:00:00Z","published_at":"2026-02-05T00:00:00Z","ingested_at":"2026-02-06T00:00:00Z","revision":1,"value":100000,"deleted":false},{"record_id":"invoice-v2","entity_id":"SME-001","source":"tax","feature":"invoice_revenue","event_at":"2026-01-31T00:00:00Z","published_at":"2026-04-01T00:00:00Z","ingested_at":"2026-04-03T00:00:00Z","revision":2,"value":135000,"deleted":false}],"max_age_days":90}
+</script>
+<script id="trial-core">
+"use strict";
+globalThis.PITTrial = (() => {
+  function parseUtc(value) {
+    if (typeof value !== "string") throw new Error("Use a UTC timestamp ending in Z.");
+    const match = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d{1,6}))?Z$/.exec(value);
+    if (!match) throw new Error("Use YYYY-MM-DDTHH:MM:SS[.ffffff]Z with at most six fractional digits. Finer precision is rejected.");
+    const milliseconds = Date.parse(match[1] + "Z");
+    if (Number(match[1].slice(0, 4)) < 1 || !Number.isFinite(milliseconds) || new Date(milliseconds).toISOString().slice(0, 19) !== match[1]) {
+      throw new Error("That UTC calendar date or time does not exist.");
+    }
+    // Date parses only the whole-second part. Retain the fractional part as
+    // integer microseconds, so a browser cannot truncate a future arrival.
+    return BigInt(milliseconds) * 1000n + BigInt((match[2] || "").padEnd(6, "0"));
+  }
+  function formatUtc(microseconds) {
+    const seconds = microseconds / 1000000n;
+    const fraction = microseconds % 1000000n;
+    return new Date(Number(seconds) * 1000).toISOString().slice(0, 19) + "." + String(fraction).padStart(6, "0") + "Z";
+  }
+  function select(fixture, decisionAt, correctionIngestedAt) {
+    const decision = parseUtc(decisionAt);
+    const rows = fixture.observations.map(original => {
+      const row = {...original, ingested_at: original.revision === 2 ? correctionIngestedAt : original.ingested_at};
+      const event = parseUtc(row.event_at), publication = parseUtc(row.published_at), ingestion = parseUtc(row.ingested_at);
+      if (publication < event || ingestion < event) throw new Error("Publication and ingestion cannot precede the January 31 observation event.");
+      return {...row, event, available: publication > ingestion ? publication : ingestion};
+    });
+    const history = rows.filter(row => row.event <= decision);
+    const known = history.filter(row => row.available <= decision);
+    const current = known.reduce((chosen, row) => !chosen || row.revision > chosen.revision ? row : chosen, null);
+    const fresh = current && decision - current.event <= BigInt(fixture.max_age_days) * 86400000000n;
+    const status = fresh ? "selected" : !history.length ? "no_history" : !known.length ? "not_available" : "stale";
+    const unsafe = history.reduce((chosen, row) => !chosen || row.revision > chosen.revision ? row : chosen, null);
+    return {
+      record_id: fresh ? current.record_id : null, value: fresh ? current.value : null, status,
+      unsafe_record_id: unsafe ? unsafe.record_id : null, unsafe_value: unsafe ? unsafe.value : null,
+      unsafe_future: Boolean(unsafe && unsafe.available > decision),
+      rows: rows.map(row => ({record_id: row.record_id, value: row.value, available_at: formatUtc(row.available), known: row.event <= decision && row.available <= decision}))
+    };
+  }
+  return {parseUtc, select};
+})();
+</script>
+<script id="trial-ui">
+"use strict";
+(() => {
+  const fixture = JSON.parse(document.getElementById("invoice-fixture").textContent);
+  const decision = document.getElementById("decision-at"), ingestion = document.getElementById("ingested-at");
+  const error = document.getElementById("input-error"), output = document.getElementById("output"), share = document.getElementById("share");
+  const shareStatus = document.getElementById("share-status");
+  const initial = new URLSearchParams(location.hash.slice(1));
+  if (initial.has("decision")) decision.value = initial.get("decision");
+  if (initial.has("ingested")) ingestion.value = initial.get("ingested");
+  const amount = value => value === null ? "Missing" : "CNY " + value.toLocaleString("en-US");
+  const put = (id, value) => { document.getElementById(id).textContent = value; };
+  function render() {
+    shareStatus.textContent = "";
+    try {
+      const result = PITTrial.select(fixture, decision.value, ingestion.value);
+      error.hidden = true; output.hidden = false; share.disabled = false;
+      put("safe-value", amount(result.value)); put("safe-record", result.status + (result.record_id ? " · " + result.record_id : ""));
+      const reasons = {selected: "This revision was available by the decision and is within the freshness window.", no_history: "The observation event is still in the future.", not_available: "The event happened, but neither revision was available to this decision.", stale: "The known observation is outside the 90-day freshness window."};
+      put("safe-reason", reasons[result.status]); put("unsafe-value", amount(result.unsafe_value)); put("unsafe-record", result.unsafe_record_id || "no_history");
+      put("unsafe-reason", result.unsafe_future ? "Future knowledge leaked in: the event-only join chooses a revision that had not arrived." : result.unsafe_record_id ? "No future arrival in this case. This comparator still ignores freshness and deletion rules." : "Even the event-only join has no earlier observation here.");
+      const body = document.getElementById("source-rows"); body.replaceChildren();
+      for (const row of result.rows) {
+        const tr = document.createElement("tr");
+        for (const [index, value] of [row.record_id, amount(row.value), row.available_at, row.known ? "Known" : "Not yet known"].entries()) {
+          const td = document.createElement("td"); td.textContent = value;
+          if (index === 2) td.className = "time";
+          if (index === 3) td.className = row.known ? "availability" : "after";
+          tr.append(td);
+        }
+        body.append(tr);
+      }
+      const parameters = new URLSearchParams({decision: decision.value, ingested: ingestion.value});
+      history.replaceState(null, "", "#" + parameters.toString());
+    } catch (problem) {
+      error.textContent = problem.message; error.hidden = false; output.hidden = true; share.disabled = true;
+    }
+  }
+  document.getElementById("timing-form").addEventListener("submit", event => { event.preventDefault(); render(); });
+  decision.addEventListener("change", render); ingestion.addEventListener("change", render);
+  for (const button of document.querySelectorAll("[data-preset]")) button.addEventListener("click", () => {
+    decision.value = button.dataset.preset; ingestion.value = "2026-04-03T00:00:00Z"; render();
+  });
+  share.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(location.href); shareStatus.textContent = "Scenario link copied."; }
+    catch { shareStatus.textContent = "Copy the address from your browser to share this scenario."; }
+  });
+  render();
+})();
+</script>
+</body></html>
