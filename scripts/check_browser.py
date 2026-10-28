@@ -134,12 +134,18 @@ def browser_check(cases, root):
             timeout=60,
         )["sessionId"]
         selections = 0
+        viewport_widths = []
         for case in cases:
             if "viewport" in case:
                 call("POST", f"/session/{session}/window/rect", case["viewport"])
             call("POST", f"/session/{session}/url", {"url": (root / case["file"]).as_uri()})
+            if "viewport" in case:
+                width = call("POST", f"/session/{session}/execute/sync", {"script": "return window.innerWidth;", "args": []})
+                if width != case["viewport"]["width"]:
+                    raise RuntimeError(f"Requested viewport width {case['viewport']['width']}, observed {width}")
+                viewport_widths.append(width)
             selections += call("POST", f"/session/{session}/execute/sync", {"script": case.get("script", SCRIPT), "args": [case]})
-        print(json.dumps({"status": "passed", "browser": "Chrome", "reports": len(cases), "selections": selections}))
+        print(json.dumps({"status": "passed", "browser": "Chrome", "reports": len(cases), "selections": selections, "viewport_widths": viewport_widths}))
     finally:
         if session is not None:
             try:
