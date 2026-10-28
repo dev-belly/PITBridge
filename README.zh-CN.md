@@ -26,8 +26,8 @@ PITBridge 同时处理数据发生时间、公开时间、入库时间和修订�
 
 需要 Git 和 Python 3.11 或更高版本。下面是 Windows PowerShell 命令，使用独立环境，无需先激活：
 
-这些命令克隆 `main` 以运行源码示例。固定安装可使用下面的 v0.2.0 wheel，
-其中已包含内置 CSV 接入、滚动特征和 `benchmark` 命令。
+这些命令克隆 `main` 以运行源码示例。固定安装可使用下面的 v0.2.1 wheel，
+其中包含内置 CSV 接入、滚动特征、`benchmark` 命令及时间精度校验。
 较早的 v0.1.0 标签不包含内置 CSV 接入和 benchmark。
 
 ```powershell
@@ -51,16 +51,16 @@ Linux / macOS 用 `python3 -m venv .venv` 创建环境，并将上述 `.\.venv\S
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install "https://github.com/dev-belly/PITBridge/releases/download/v0.2.0/pitbridge-0.2.0-py3-none-any.whl"
+.\.venv\Scripts\python.exe -m pip install "https://github.com/dev-belly/PITBridge/releases/download/v0.2.1/pitbridge-0.2.1-py3-none-any.whl"
 .\.venv\Scripts\python.exe -m pitbridge demo --out outputs
 .\.venv\Scripts\python.exe -m pitbridge verify --out outputs
 ```
 
-[发布页面](https://github.com/dev-belly/PITBridge/releases/tag/v0.2.0)同时提供源码包、
+[发布页面](https://github.com/dev-belly/PITBridge/releases/tag/v0.2.1)同时提供源码包、
 安装核验记录、固定提交号的发布清单和 SHA-256 校验值。wheel 从源码包构建，
-在离开源码目录的干净环境中检查四条 JSON/CSV 路径与小规模 benchmark；
+在离开源码目录的干净环境中检查四条 JSON/CSV 路径、时间精度及小规模 benchmark；
 完整主分支 CI（包括 Windows、pandas 和 Chrome）通过后才发布同一份产物。
-[升级与重放边界](docs/releases/v0.2.0.md) · [复现发布检查](docs/RELEASING.md)。
+[升级与重放边界](docs/releases/v0.2.1.md) · [复现发布检查](docs/RELEASING.md)。
 
 ## 可直接复用的 Python 案例
 

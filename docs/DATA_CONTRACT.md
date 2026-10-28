@@ -20,9 +20,11 @@ CSV and the optional pandas example use this same validation before selection
 or report creation. A source with finer timestamps must choose and document an
 upstream conversion policy; this engine does not infer one.
 
-These stricter checks are on `main` after the v0.2.0 release. Existing release
-assets are unchanged; use the source installation for this validation. Bundles
-with timestamps already in the supported form retain their original bytes.
+These stricter checks are included in v0.2.1. The unchanged v0.2.0 wheel can
+truncate excess digits before selection. Previously discarded timestamp digits
+cannot be recovered from normalized bundles: retain the original source and
+rebuild affected inputs before reviewing decisions. Bundles with timestamps
+already in the supported form retain their original bytes.
 
 | Field | Type / rule |
 | :--- | :--- |

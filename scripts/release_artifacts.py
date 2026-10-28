@@ -51,6 +51,15 @@ def validate_check(path: Path, version: str) -> None:
         or check.get("version") != version
     ):
         raise ValueError("Installed check must pass for the source version")
+    precision = check.get("timestamp_precision")
+    if (
+        not isinstance(precision, dict)
+        or precision.get("cutoff_and_late_microsecond") is not True
+        or type(precision.get("json_and_csv_rejections")) is not int
+        or precision["json_and_csv_rejections"] != 4
+        or precision.get("no_reports_on_rejection") is not True
+    ):
+        raise ValueError("Installed timestamp-precision boundary evidence is required")
     for section, key in (
         ("scalar", "independent_replay"),
         ("rolling", "independent_temporal_replay"),
