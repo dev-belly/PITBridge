@@ -9,6 +9,21 @@ and file/physical-line errors. JSON and CSV are mutually exclusive input routes.
 
 ## Observations
 
+All observation and decision timestamps support at most six fractional-second
+digits, attached to an explicit seconds field (`HH:MM:SS` or `HHMMSS`). Fractions
+on shortened hour/minute forms are rejected. Excess digits are rejected, including trailing zeros; they are never
+truncated or rounded into an earlier decision. UTC offsets must use whole
+seconds (ordinary `Z`, `+08:00` and `-05:00` offsets remain supported).
+Fractional-second offsets are rejected because the underlying datetime parser
+can discard their fraction when the whole-second offset is zero. JSON, native
+CSV and the optional pandas example use this same validation before selection
+or report creation. A source with finer timestamps must choose and document an
+upstream conversion policy; this engine does not infer one.
+
+These stricter checks are on `main` after the v0.2.0 release. Existing release
+assets are unchanged; use the source installation for this validation. Bundles
+with timestamps already in the supported form retain their original bytes.
+
 | Field | Type / rule |
 | :--- | :--- |
 | `record_id` | Unique, nonempty trimmed string. |

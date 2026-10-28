@@ -3,6 +3,7 @@
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 import math
+import re
 import sqlite3
 from typing import Iterable
 
@@ -10,6 +11,17 @@ from typing import Iterable
 def utc(value: str) -> str:
     if not isinstance(value, str):
         raise ValueError("timestamps must be timezone-aware ISO-8601 strings")
+    # fromisoformat silently truncates fractions beyond six places. A future
+    # ingestion instant must never become equal to an earlier decision cutoff.
+    # Fractional zero-second UTC offsets can also lose their fraction in that
+    # parser, so require whole-second offsets consistently for every timezone.
+    if re.search(r"[+-][0-9:]+[.,][0-9]+\Z", value):
+        raise ValueError("timestamp timezone offsets must use whole seconds")
+    if re.search(r"[.,][0-9]{7,}", value):
+        raise ValueError("timestamps support at most microsecond precision (six fractional digits)")
+    fraction = re.search(r"([0-9:]+)[.,][0-9]+", value)
+    if fraction and not re.fullmatch(r"(?:[0-9]{2}:[0-9]{2}:[0-9]{2}|[0-9]{6})", fraction[1]):
+        raise ValueError("fractional timestamps must include hours, minutes and seconds")
     try:
         parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
     except ValueError as exc:
