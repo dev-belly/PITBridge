@@ -4,6 +4,7 @@ import sys
 
 from .bundle import read_json, verify_bundle, write_bundle
 from .csv_inputs import load_csv_inputs
+from .csv_starter import write_csv_starter
 from .demo import demo_inputs
 from .rolling_bundle import rolling_demo_inputs, verify_rolling_bundle, write_rolling_bundle
 
@@ -11,6 +12,9 @@ from .rolling_bundle import rolling_demo_inputs, verify_rolling_bundle, write_ro
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Build and independently replay availability-aware feature evidence")
     sub = parser.add_subparsers(dest="command", required=True)
+    starter = sub.add_parser("init-csv", help="Create editable synthetic input tables without a checkout")
+    starter.add_argument("--out", required=True, help="New input directory; existing paths are refused")
+    starter.add_argument("--rolling", action="store_true", help="Create rolling rather than scalar inputs")
     benchmark = sub.add_parser("benchmark", help="Measure scalar joins in isolated processes")
     benchmark.add_argument("--rows", nargs="+", type=int, default=[100_000, 1_000_000])
     benchmark.add_argument("--repeats", type=int, default=3)
@@ -25,7 +29,9 @@ def main(argv=None):
             source.add_argument("--csv-dir", help="Directory with observations.csv, decisions.csv and specs.csv (rolling_specs.csv for aggregate)")
     args = parser.parse_args(argv)
     try:
-        if args.command == "benchmark":
+        if args.command == "init-csv":
+            result = write_csv_starter(args.out, rolling=args.rolling)
+        elif args.command == "benchmark":
             from .benchmark import run_scaling
             result = run_scaling(tuple(args.rows), args.repeats, args.seed, args.out)
         elif args.command == "verify-rolling":

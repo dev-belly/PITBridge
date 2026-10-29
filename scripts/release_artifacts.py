@@ -73,6 +73,34 @@ def validate_check(path: Path, version: str) -> None:
                 raise ValueError(
                     "Installed JSON and CSV scalar/rolling replay evidence is required"
                 )
+    starters = check.get("csv_starters")
+    if not isinstance(starters, dict):
+        raise ValueError("Installed editable CSV starter evidence is required")
+    for mode, observations, decisions, replay_key in (
+        ("scalar", 11, 15, "independent_replay"),
+        ("rolling", 10, 4, "independent_temporal_replay"),
+    ):
+        starter = starters.get(mode)
+        if not isinstance(starter, dict):
+            raise ValueError("Installed editable CSV starter evidence is required")
+        created, replay = starter.get("created"), starter.get("replay")
+        if (
+            not isinstance(created, dict)
+            or created.get("status") != "created"
+            or created.get("mode") != mode
+            or created.get("data_kind") != "synthetic"
+            or created.get("observations") != observations
+            or created.get("decisions") != decisions
+            or created.get("specifications") != 3
+            or not isinstance(replay, dict)
+            or replay.get("verified") is not True
+            or replay.get(replay_key) is not True
+            or starter.get("demo_result_files_match") is not True
+            or starter.get("existing_inputs_preserved") is not True
+        ):
+            raise ValueError("Installed editable CSV starter evidence is incomplete")
+    if starters["scalar"].get("edited_arrival_replayed") is not True:
+        raise ValueError("Installed editable CSV starter must replay an edited arrival")
     trials = check.get("benchmark", {}).get("trials", [])
     if (
         len(trials) != 1

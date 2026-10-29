@@ -232,6 +232,86 @@ def check(directory: Path) -> dict:
                     raise ValueError(
                         f"JSON/CSV installed-package evidence differs: {name}/{filename}"
                     )
+        starter_results = {}
+        for name, command, check_command, comparison_files in (
+            ("scalar", "build", "verify", ("snapshots.csv", "comparison.csv")),
+            ("rolling", "aggregate", "verify-rolling", ("features.csv", "members.csv")),
+        ):
+            tables = work / f"editable {name} inputs"
+            arguments = ("--rolling",) if name == "rolling" else ()
+            created = json.loads(
+                run(str(cli), "init-csv", "--out", str(tables), *arguments)
+            )
+            before = {path.name: path.read_bytes() for path in tables.iterdir()}
+            if set(created.get("files", [])) != set(before) or len(before) != 4:
+                raise ValueError(
+                    "Starter file inventory differs from its creation result"
+                )
+            output = work / f"starter-{name}-report"
+            run(str(cli), command, "--csv-dir", str(tables), "--out", str(output))
+            replay = json.loads(run(str(cli), check_command, "--out", str(output)))
+            for filename in comparison_files:
+                if (work / name / filename).read_bytes() != (
+                    output / filename
+                ).read_bytes():
+                    raise ValueError(
+                        f"Starter differs from the installed demo: {name}/{filename}"
+                    )
+            duplicate = subprocess.run(
+                (str(cli), "init-csv", "--out", str(tables), *arguments),
+                cwd=work,
+                env=environment,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                capture_output=True,
+                check=False,
+            )
+            if (
+                duplicate.returncode != 2
+                or duplicate.stdout
+                or "Traceback" in duplicate.stderr
+                or before != {path.name: path.read_bytes() for path in tables.iterdir()}
+            ):
+                raise ValueError(
+                    "Starter replaced edited inputs or failed its error contract"
+                )
+            starter_results[name] = {
+                "created": created,
+                "replay": replay,
+                "demo_result_files_match": True,
+                "existing_inputs_preserved": True,
+            }
+            if name == "scalar":
+                source = tables / "observations.csv"
+                with source.open(encoding="utf-8", newline="") as handle:
+                    reader = csv.DictReader(handle)
+                    columns, records = reader.fieldnames, list(reader)
+                for record in records:
+                    if record["record_id"] == "tax-a-v2":
+                        record["ingested_at"] = "2026-04-03T00:00:00Z"
+                with source.open("w", encoding="utf-8", newline="") as handle:
+                    writer = csv.DictWriter(
+                        handle, fieldnames=columns, lineterminator="\n"
+                    )
+                    writer.writeheader()
+                    writer.writerows(records)
+                edited = work / "starter-edited-report"
+                run(str(cli), "build", "--csv-dir", str(tables), "--out", str(edited))
+                run(str(cli), "verify", "--out", str(edited))
+                with (edited / "snapshots.csv").open(
+                    encoding="utf-8", newline=""
+                ) as handle:
+                    row = next(
+                        row
+                        for row in csv.DictReader(handle)
+                        if row["decision_id"] == "SME-A-4" and row["source"] == "tax"
+                    )
+                if row["record_id"] != "tax-a-v1" or float(row["value"]) != 100000:
+                    raise ValueError(
+                        "An edited starter arrival did not change the selected revision"
+                    )
+                starter_results[name]["edited_arrival_replayed"] = True
         benchmark = json.loads(
             run(
                 str(cli),
@@ -259,6 +339,7 @@ def check(directory: Path) -> dict:
             "scalar": scalar,
             "rolling": rolling,
             "csv": csv_results,
+            "csv_starters": starter_results,
             "benchmark": benchmark,
         }
 

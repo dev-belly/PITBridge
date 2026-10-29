@@ -4,6 +4,37 @@ PITBridge v0.2.0 reads UTF-8 CSV tables using Python's standard library.
 Use the README's [checked release installation](../README.md#install-the-checked-release)
 or its source instructions. The v0.1.0 tag does not have `--csv-dir`.
 
+## Create a case from an installed wheel
+
+With **v0.2.2+**, create all required tables before editing them. No repository
+examples or network access are needed after installation:
+
+```bash
+python -m pitbridge init-csv --out inputs/scalar
+python -m pitbridge build --csv-dir inputs/scalar --out outputs/scalar
+python -m pitbridge verify --out outputs/scalar
+
+python -m pitbridge init-csv --rolling --out inputs/rolling
+python -m pitbridge aggregate --csv-dir inputs/rolling --out outputs/rolling
+python -m pitbridge verify-rolling --out outputs/rolling
+```
+
+Use your virtual environment's Python. Each starter writes three UTF-8 CSVs and
+a README to a new directory; existing paths fail with exit 2 and are preserved.
+The complete tables are validated before the directory is published. Use a
+separate report output for each trial. Scalar tables contain the three-source
+11-observation / 15-decision demo; rolling tables contain ten observations and
+four decisions. All values are synthetic, including when CSV intake labels
+them `user_supplied`.
+
+To practice a late arrival, change `tax-a-v2`'s ingestion time to
+`2026-04-03T00:00:00Z` in the scalar observations. For `SME-A-4`, the selected
+invoice revision changes from 2 / 180,000 to 1 / 100,000. Rebuild into a new
+directory and inspect the selected record and availability time. The three
+rolling 30-day sums for SME-A are 1,500, 4,300 and 6,300; `members.csv` keeps the
+revisions responsible for each number. Edit or replace the tables according to
+the contract below; do not treat the fixture as observed financial evidence.
+
 ## Scalar snapshots
 
 Put these three files in one directory. Every listed column is required;

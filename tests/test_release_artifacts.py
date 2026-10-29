@@ -37,6 +37,26 @@ class ReleaseArtifactTests(unittest.TestCase):
             "scalar": scalar,
             "rolling": rolling,
             "csv": {"scalar": scalar, "rolling": rolling},
+            "csv_starters": {
+                mode: {
+                    "created": {
+                        "status": "created",
+                        "mode": mode,
+                        "data_kind": "synthetic",
+                        "observations": observations,
+                        "decisions": decisions,
+                        "specifications": 3,
+                    },
+                    "replay": replay,
+                    "demo_result_files_match": True,
+                    "existing_inputs_preserved": True,
+                    **({"edited_arrival_replayed": True} if mode == "scalar" else {}),
+                }
+                for mode, observations, decisions, replay in (
+                    ("scalar", 11, 15, scalar),
+                    ("rolling", 10, 4, rolling),
+                )
+            },
             "benchmark": {
                 "trials": [
                     {
@@ -126,6 +146,29 @@ class ReleaseArtifactTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "digests differ"):
             self.prepare()
         self.assertFalse(self.destination.exists())
+
+    def test_missing_or_incomplete_editable_starter_evidence_prevents_publication(self):
+        original = copy.deepcopy(self.result)
+        for mode, field in (
+            (None, None),
+            ("scalar", None),
+            ("rolling", None),
+            ("scalar", "existing_inputs_preserved"),
+            ("rolling", "demo_result_files_match"),
+            ("scalar", "edited_arrival_replayed"),
+        ):
+            self.result = copy.deepcopy(original)
+            if mode is None:
+                self.result.pop("csv_starters")
+            elif field is None:
+                self.result["csv_starters"].pop(mode)
+            else:
+                self.result["csv_starters"][mode][field] = False
+            self.write_check()
+            with self.subTest(mode=mode, field=field):
+                with self.assertRaisesRegex(ValueError, "editable CSV starter"):
+                    self.prepare()
+                self.assertFalse(self.destination.exists())
 
     def test_missing_or_false_installed_precision_evidence_prevents_publication(self):
         original = copy.deepcopy(self.result)
