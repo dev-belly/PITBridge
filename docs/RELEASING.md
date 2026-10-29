@@ -11,6 +11,13 @@ selection and rejects a seventh digit on all four scalar/rolling JSON/CSV CLI
 routes before creating a report. The benchmark is an installation smoke check,
 not a release performance claim.
 
+The installed gate also runs both `init-csv` modes from that empty work
+directory, builds and independently replays their reports, and compares their
+result CSVs with the installed demos. It rejects a second initialization without
+changing input bytes, then edits an arrival and verifies the changed scalar
+selection. Publication requires this editable-starter evidence alongside the
+existing timestamp, JSON/CSV replay and benchmark checks.
+
 To reproduce from a clean checkout with no stale files in `dist` or `release`:
 
 ```bash

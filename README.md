@@ -35,8 +35,9 @@ dependencies**. The commands use a virtual environment without requiring
 activation.
 
 These commands clone `main` for the source examples. For a fixed installation
-without Git, use the [checked v0.2.1 wheel](#install-the-checked-release).
-v0.2.1 includes the installed CSV importer, rolling features and `benchmark`,
+without Git, use the [checked v0.2.2 wheel](#install-the-checked-release).
+v0.2.2 adds editable CSV generation with `init-csv`, alongside the installed
+CSV importer, rolling features and `benchmark`,
 and rejects unsupported timestamp precision before selection; the earlier
 v0.1.0 tag lacks the CSV importer and benchmark.
 
@@ -82,21 +83,21 @@ Install this repository's wheel directly, using its full URL:
 
 ```bash
 python3 -m venv .venv
-.venv/bin/python -m pip install "https://github.com/dev-belly/PITBridge/releases/download/v0.2.1/pitbridge-0.2.1-py3-none-any.whl"
+.venv/bin/python -m pip install "https://github.com/dev-belly/PITBridge/releases/download/v0.2.2/pitbridge-0.2.2-py3-none-any.whl"
 .venv/bin/python -m pitbridge demo --out outputs
 .venv/bin/python -m pitbridge verify --out outputs
 ```
 
 On Windows, create the environment with `python -m venv .venv` and substitute
 `.\.venv\Scripts\python.exe` for `.venv/bin/python`.
-The [release page](https://github.com/dev-belly/PITBridge/releases/tag/v0.2.1)
+The [release page](https://github.com/dev-belly/PITBridge/releases/tag/v0.2.2)
 also provides the source archive, `installed-check.json`, an exact-commit
 `release-manifest.json` and `CHECKSUMS.sha256`. The wheel is built from the
 source archive, installed in a fresh environment outside the checkout and
 used for scalar/rolling JSON and CSV replay, timestamp-precision checks and a small benchmark. Publishing
 waits for the complete main CI, including Windows, pandas and Chrome jobs;
 the publisher verifies the exact CI artifacts instead of rebuilding them.
-[Release notes and replay compatibility](docs/releases/v0.2.1.md) ·
+[Release notes and replay compatibility](docs/releases/v0.2.2.md) ·
 [Reproduce the release checks](docs/RELEASING.md).
 
 ## Use the Python API
@@ -116,13 +117,42 @@ The January event date is the same for both versions. The April correction
 cannot become a February feature. [See the input lists and full output](examples/README.md)
 to adapt the example to your own data.
 
-Starting from tables? Import three strict CSVs directly through the installed
-CLI, with **no pandas required**:
+### Create editable CSV inputs
+
+The installed wheel creates complete input tables from an empty directory,
+with **no checkout or pandas required**:
 
 ```bash
-.venv/bin/python -m pitbridge build --csv-dir examples/csv --out outputs/csv
+.venv/bin/python -m pitbridge init-csv --out inputs/scalar
+.venv/bin/python -m pitbridge build --csv-dir inputs/scalar --out outputs/csv
 .venv/bin/python -m pitbridge verify --out outputs/csv
 ```
+
+The starter contains **11 synthetic observations, 15 decisions and three
+feature specifications**, plus a short README. Choose a new input directory;
+existing files and directories are refused. Generated UTF-8 tables use the same
+strict contract as your own inputs. CSV intake labels them `user_supplied`;
+that label does not authenticate a source or turn the synthetic case into
+observed data.
+
+Try one edit in `inputs/scalar/observations.csv`: move `tax-a-v2`'s `ingested_at`
+to `2026-04-03T00:00:00Z`, then build and verify a new output directory. The
+`SME-A-4` tax snapshot changes from revision 2 / 180,000 to revision 1 / 100,000.
+Later decisions can still use the separately available February observation.
+
+For rolling sum, mean and count, create a separate case:
+
+```bash
+.venv/bin/python -m pitbridge init-csv --rolling --out inputs/rolling
+.venv/bin/python -m pitbridge aggregate --csv-dir inputs/rolling --out outputs/rolling-csv
+.venv/bin/python -m pitbridge verify-rolling --out outputs/rolling-csv
+```
+
+The rolling case has ten observations, four decisions and three specifications.
+The 30-day sums for SME-A are 1,500 / 4,300 / 6,300 on February 10 / 11 / 12;
+inspect `members.csv` to trace the available revisions. These are synthetic
+teaching amounts, not observed business results. v0.2.1 and earlier lack
+`init-csv`; use the checked v0.2.2 wheel or current source.
 
 The [CSV contract](docs/CSV_INPUTS.md) covers headers, nulls, revisions, timestamps
 and rolling tables. The [optional pandas example](examples/README.md#optional-pandascsv-input)
@@ -204,7 +234,7 @@ features and 120 held-out predictions**. Its source fixture includes **192
 observations that were not yet available at their decision time**, so the
 adapter has to preserve PITBridge's availability contract instead of performing
 a plain event-date join. CreditVintage currently pins PITBridge commit
-`ed19dc698534f45a2b646fb4976ff6b01966b0cc`; its CI verifies the PITBridge
+`219e58a7c2acc4a3fcd4f7ffdb68ba8eef0564f0`; its CI verifies the PITBridge
 bundle with both the SQL engine and independent Python oracle before rebuilding
 the downstream model evidence.
 
@@ -212,6 +242,9 @@ This is a downstream integration, not a claim that the two repositories form a
 production banking platform. The full adapter contract, units, UTC convention
 and replay boundaries live in
 [CreditVintage's lineage documentation](https://github.com/dev-belly/CreditVintage/blob/main/docs/LINEAGE.md).
+
+Earlier saved integration evidence retains its `ed19dc6` reference and full
+semantic replay. The standalone CSV starter does not change that integration pin.
 
 ## Scope
 

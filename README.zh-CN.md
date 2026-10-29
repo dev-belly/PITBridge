@@ -26,8 +26,8 @@ PITBridge 同时处理数据发生时间、公开时间、入库时间和修订�
 
 需要 Git 和 Python 3.11 或更高版本。下面是 Windows PowerShell 命令，使用独立环境，无需先激活：
 
-这些命令克隆 `main` 以运行源码示例。固定安装可使用下面的 v0.2.1 wheel，
-其中包含内置 CSV 接入、滚动特征、`benchmark` 命令及时间精度校验。
+这些命令克隆 `main` 以运行源码示例。固定安装可使用下面的 v0.2.2 wheel，
+其中新增 `init-csv` 可编辑模板生成，并包含 CSV 接入、滚动特征、`benchmark` 及时间精度校验。
 较早的 v0.1.0 标签不包含内置 CSV 接入和 benchmark。
 
 ```powershell
@@ -51,16 +51,16 @@ Linux / macOS 用 `python3 -m venv .venv` 创建环境，并将上述 `.\.venv\S
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install "https://github.com/dev-belly/PITBridge/releases/download/v0.2.1/pitbridge-0.2.1-py3-none-any.whl"
+.\.venv\Scripts\python.exe -m pip install "https://github.com/dev-belly/PITBridge/releases/download/v0.2.2/pitbridge-0.2.2-py3-none-any.whl"
 .\.venv\Scripts\python.exe -m pitbridge demo --out outputs
 .\.venv\Scripts\python.exe -m pitbridge verify --out outputs
 ```
 
-[发布页面](https://github.com/dev-belly/PITBridge/releases/tag/v0.2.1)同时提供源码包、
+[发布页面](https://github.com/dev-belly/PITBridge/releases/tag/v0.2.2)同时提供源码包、
 安装核验记录、固定提交号的发布清单和 SHA-256 校验值。wheel 从源码包构建，
 在离开源码目录的干净环境中检查四条 JSON/CSV 路径、时间精度及小规模 benchmark；
 完整主分支 CI（包括 Windows、pandas 和 Chrome）通过后才发布同一份产物。
-[升级与重放边界](docs/releases/v0.2.1.md) · [复现发布检查](docs/RELEASING.md)。
+[升级与重放边界](docs/releases/v0.2.2.md) · [复现发布检查](docs/RELEASING.md)。
 
 ## 可直接复用的 Python 案例
 
@@ -77,15 +77,31 @@ python -m venv .venv
 
 ## 从 CSV 表格试用
 
-已有表格可直接使用内置命令，无需 pandas：
+只安装 wheel，也能从空目录生成可编辑的完整表格，无需克隆仓库或安装 pandas：
 
 ```powershell
-.\.venv\Scripts\python.exe -m pitbridge build --csv-dir examples/csv --out outputs/csv
+.\.venv\Scripts\python.exe -m pitbridge init-csv --out inputs/scalar
+.\.venv\Scripts\python.exe -m pitbridge build --csv-dir inputs/scalar --out outputs/csv
 .\.venv\Scripts\python.exe -m pitbridge verify --out outputs/csv
 ```
 
-源码示例读取 `examples/csv/` 的三份合成表格，输出同样的三条记录：尚未可用、`invoice-v1`（100,000）、`invoice-v2`（135,000）。
-只安装 wheel 时，将 `examples/csv` 换成自己的三表目录。
+模板包含 11 条合成观察、15 次决策、3 项特征规则和使用说明。输入目录必须尚不存在，
+重复生成会拒绝覆盖。将 `observations.csv` 中 `tax-a-v2` 的入库时间改成
+`2026-04-03T00:00:00Z`，再构建到新的输出目录：`SME-A-4` 的税票快照会从
+修订 2 / 180,000 回退到当时可见的修订 1 / 100,000。
+
+滚动统计使用独立的模板：
+
+```powershell
+.\.venv\Scripts\python.exe -m pitbridge init-csv --rolling --out inputs/rolling
+.\.venv\Scripts\python.exe -m pitbridge aggregate --csv-dir inputs/rolling --out outputs/rolling-csv
+.\.venv\Scripts\python.exe -m pitbridge verify-rolling --out outputs/rolling-csv
+```
+
+滚动模板含 10 条观察、4 次决策与 3 项规则；SME-A 的 30 天加总在 2 月 10/11/12 日
+分别为 1,500 / 4,300 / 6,300，可从 `members.csv` 核查成员。以上均为合成教学数据；
+CSV 报告的 `user_supplied` 仅表示接入路线，不证明数据真实或完整。
+`init-csv` 从 v0.2.2 开始提供；旧版安装包仍保留原有功能。
 严格检查表头、行宽、带时区时间、整数修订、撤销标记和显式缺失；不把缺失值填成零。
 [字段规则和滚动表格](docs/CSV_INPUTS.md)。需要 DataFrame 时仍可选择
 [单独安装 pandas 的示例](examples/README.md#optional-pandascsv-input)。
@@ -128,10 +144,11 @@ PITBridge 现在不仅是独立演示组件，也被
 默认合成集成案例包含 **480 个申请、1,440 个已选择特征和 120 个留出集预测**，
 其中源数据里有 **192 条记录在对应决策时点尚不可用**。因此下游不能只按业务发生日期直接关联，
 而必须保留 PITBridge 的可用性和版本规则。CreditVintage 当前固定使用 PITBridge
-`ed19dc698534f45a2b646fb4976ff6b01966b0cc`，CI 会先用 SQL 引擎和独立 Python oracle
+`219e58a7c2acc4a3fcd4f7ffdb68ba8eef0564f0`，CI 会先用 SQL 引擎和独立 Python oracle
 重放 PITBridge 证据，再重建后续模型证据。
 
 这证明的是一条可重放的“源数据 → 时点特征 → 模型输入 → 预测”研究链路，不代表真实银行生产系统。
+历史保存的集成证据仍可保留 `ed19dc6` 引用并完整重放；新增 CSV 模板不改变下游固定版本。
 完整单位、UTC 约定和适配边界见
 [CreditVintage 的 LINEAGE 文档](https://github.com/dev-belly/CreditVintage/blob/main/docs/LINEAGE.md)。
 
