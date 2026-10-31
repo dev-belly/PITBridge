@@ -1,7 +1,8 @@
 # PITBridge｜金融时点数据与版本溯源
 
 **[直接试用：无需登录或安装](https://dev-belly.github.io/PITBridge/try/)**
-改一个入库时间，对照“只看事件日期”的错误结果与决策时点快照；可以复制场景链接。
+改一个入库时间，对照“只看事件日期”的错误结果与决策时点快照；可以复制场景链接，
+或[下载当前情景并在本地独立核验](examples/README.md#replay-a-downloaded-browser-scenario)。
 这是固定合成发票的浏览器教学案例，微秒边界与 Python/SQLite 独立复算核对。
 接入自己的数据请继续使用下文的 Python API 和三表 CSV 合同。
 

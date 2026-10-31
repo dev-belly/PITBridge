@@ -6,6 +6,42 @@ fixed, synthetic two-revision case in your browser, supports exact microsecond
 cutoffs and copies shareable scenario links. CI checks 71 scenarios against
 both Python engines and exercises the visible desktop/mobile controls. This is
 a small teaching mirror; the package remains the full importer and verifier.
+The current scenario can also be downloaded and replayed locally.
+
+## Replay a downloaded browser scenario
+
+In the [browser lesson](https://dev-belly.github.io/PITBridge/try/), edit either
+timestamp and choose **Download this case · JSON**. The file contains the two
+original synthetic invoice records, your decision and the 90-day rule. It
+retains exact timestamp text, including microseconds. Invalid inputs remove
+the download; the browser never uploads your scenario.
+
+Follow the [checked-wheel installation](../README.md#install-the-checked-release),
+then move `pitbridge-scenario.json` into that first-run folder beside `.venv`.
+No source checkout or pandas is needed. Linux / macOS:
+
+```bash
+.venv/bin/python -m pitbridge build --inputs pitbridge-scenario.json --out scenario-report
+.venv/bin/python -m pitbridge verify --out scenario-report
+```
+
+Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m pitbridge build --inputs pitbridge-scenario.json --out scenario-report
+.\.venv\Scripts\python.exe -m pitbridge verify --out scenario-report
+```
+
+Use a new report directory for each trial. With decision
+`2026-04-03T00:00:00Z` and correction ingestion
+`2026-04-03T00:00:00.000001Z`, `snapshots.csv` selects `invoice-v1` / 100,000.
+At exact equality it selects `invoice-v2` / 135,000, matching the browser.
+`verify` checks every saved file and replays the snapshot through SQLite and
+the independent Python enumerator. The download is **input data**, not a
+verified report, signed evidence or observed borrower data. The checked
+v0.2.2 wheel accepts this existing JSON contract; no new package release is needed.
+
+## Run the notebook or source example
 
 To run the actual Python API without setting up a local checkout,
 [Open the invoice notebook in Colab](https://colab.research.google.com/github/dev-belly/PITBridge/blob/main/examples/decision_time.ipynb)

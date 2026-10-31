@@ -7,9 +7,10 @@ import json
 from pathlib import Path
 import random
 import subprocess
+import tempfile
 
 from pitbridge import Decision, FeatureSpec, Observation, build_snapshot, load_csv_inputs, reference_snapshot
-from pitbridge.bundle import decode_inputs
+from pitbridge.bundle import decode_inputs, verify_bundle, write_bundle
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -61,7 +62,8 @@ def main():
     result = subprocess.run(["node", str(ROOT / "scripts/check_trial.mjs"), "--cases"], input=json.dumps(cases), text=True, capture_output=True, check=True)
     actual = json.loads(result.stdout)
     expected = []
-    for case in cases:
+    exported = 0
+    for case, browser in zip(cases, actual, strict=True):
         try:
             rows = [Observation(**(row | ({"ingested_at": case["ingested"]} if row["revision"] == 2 else {}))) for row in fixture["observations"]]
             decisions = [Decision("trial", "SME-001", case["decision"])]
@@ -73,6 +75,21 @@ def main():
             expected.append({"ok": False})
             continue
         selected = snapshots[0]
+        portable = browser.pop("inputs")
+        expected_inputs = {
+            "data_kind": "synthetic",
+            "observations": [row | ({"ingested_at": case["ingested"]} if row["revision"] == 2 else {})
+                             for row in fixture["observations"]],
+            "decisions": [{"decision_id": "trial", "entity_id": "SME-001", "decision_at": case["decision"]}],
+            "specs": [{"source": "tax", "feature": "invoice_revenue", "max_age_days": 90}],
+        }
+        if portable != expected_inputs or build_snapshot(*decode_inputs(portable)) != snapshots:
+            raise AssertionError("Exported inputs lose the browser scenario or source records")
+        with tempfile.TemporaryDirectory() as directory:
+            write_bundle(portable, directory)
+            if verify_bundle(directory).get("verified") is not True:
+                raise AssertionError("Exported input report did not independently replay")
+        exported += 1
         baseline = max((row for row in rows if row.event_at <= decisions[0].decision_at), key=lambda row: row.revision, default=None)
         expected.append({"ok": True, **{key: asdict(selected)[key] for key in ("record_id", "value", "status")},
                          "unsafe_record_id": baseline.record_id if baseline else None,
@@ -80,7 +97,8 @@ def main():
                          "unsafe_future": bool(baseline and baseline.available_at > decisions[0].decision_at)})
     if actual != expected:
         raise AssertionError("Browser/SQL/reference selection mismatch")
-    print(json.dumps({"status": "passed", "scenarios": len(cases), "engines": ["shipped browser core", "SQLite", "independent Python"]}))
+    print(json.dumps({"status": "passed", "scenarios": len(cases), "exported_cases_replayed": exported,
+                      "engines": ["shipped browser core", "SQLite", "independent Python"]}))
 
 
 if __name__ == "__main__":

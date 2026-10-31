@@ -10,8 +10,8 @@
 **Change one arrival time and see which invoice revision survives.** The
 [30-second browser lesson](https://dev-belly.github.io/PITBridge/try/) runs
 without installation or an account. Compare a wrong event-only join with the
-decision-time result, then copy a link to your scenario. Its fixed synthetic
-case is checked against SQLite and the independent Python engine. To use your
+decision-time result, then copy a link or [download and replay your exact scenario](examples/README.md#replay-a-downloaded-browser-scenario).
+Its fixed synthetic case is checked against SQLite and the independent Python engine. To use your
 own data, continue with the Python API or strict CSV importer below.
 
 The notebook installs **dev-belly/PITBridge** from a full source URL pinned to one

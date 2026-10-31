@@ -117,6 +117,12 @@ SQLite and the independent Python enumerator over 71 fixed/seeded cases. Node
 is not a package runtime dependency. The Chrome job also exercises all three
 presets, edited cutoff equality, one-microsecond delay, invalid precision,
 share-link state and page overflow at desktop and 390-pixel mobile widths.
+Every valid core scenario also exports JSON, then builds and independently
+replays a complete report in Python. Chrome edits without submitting the form,
+checks cutoff equality, rejects invalid precision and saves the actual download
+at both viewport widths. Those downloaded bytes are decoded, compared with the
+visible selection and independently replayed. Keep exports explicitly synthetic;
+do not include browser results as already-verified evidence.
 
 The `Chrome reports and no-install invoice lesson` CI job uses the Ubuntu runner's installed Chrome
 and matching chromedriver to select CR/LF, NUL and Unicode identities in the
