@@ -43,6 +43,7 @@
       <article class="result unsafe"><div class="result-label">Wrong event-date-only join</div><div class="amount" id="unsafe-value"></div><div class="status" id="unsafe-record"></div><p class="reason" id="unsafe-reason"></p></article>
     </div>
     <section class="panel" aria-labelledby="trace-heading"><h2 id="trace-heading">Follow the two source records</h2><p class="foot">Both observations describe January 31. The freshness window is 90 × 24 hours, inclusive.</p><div class="table-wrap"><table><thead><tr><th scope="col">Revision</th><th scope="col">Value</th><th scope="col">Available at UTC</th><th scope="col">At this decision</th></tr></thead><tbody id="source-rows"></tbody></table></div><p class="foot">Original published February 5, ingested February 6. Correction published April 1; you control its ingestion. Revision 2 can replace revision 1 only after it is known.</p></section>
+    <section class="panel" aria-labelledby="replay-heading"><h2 id="replay-heading">Take this exact case into Python</h2><p>Download both synthetic revisions, your decision time and the 90-day rule as one input file. The file keeps your timestamps, including microseconds; it contains inputs, not a verified report.</p><a class="button primary" id="download-case" download="pitbridge-scenario.json">Download this case · JSON</a><p lang="zh-CN">下载当前情景，用已安装的 PITBridge 构建报告并独立核验。数据始终为合成案例。</p><p>After <a href="https://github.com/dev-belly/PITBridge#install-the-checked-release">installing the checked wheel</a>, run these commands from the download folder with that environment's Python. Choose a new report directory for each trial.</p><p><code>python -m pitbridge build --inputs pitbridge-scenario.json --out scenario-report</code><br><code>python -m pitbridge verify --out scenario-report</code></p><p class="foot">Compare the selected record and missingness status in <code>snapshots.csv</code> with the browser result above. This fixed case is separate from the larger <a href="https://github.com/dev-belly/PITBridge/blob/main/docs/CSV_INPUTS.md">editable CSV starters</a>.</p></section>
   </section>
   <footer><h2>Take the rule into your own pipeline</h2><p>Try your own tables with the <a href="https://github.com/dev-belly/PITBridge/blob/main/docs/CSV_INPUTS.md">three-CSV contract</a>, or run the <a href="https://colab.research.google.com/github/dev-belly/PITBridge/blob/main/examples/decision_time.ipynb">Python notebook</a>. <a href="https://github.com/dev-belly/PITBridge/issues/new?template=trial_feedback.md">Share a reproducible trial result</a>.</p><p>If this timing question helps your work, <a class="button" href="https://github.com/dev-belly/PITBridge">Star PITBridge</a> <a class="button" href="https://github.com/dev-belly">Follow dev-belly</a></p><p class="foot">This page mirrors one fixed, two-revision lesson; CI compares it with the Python/SQLite engine and independent enumerator. It is not the full importer or a credit decision tool. No data is uploaded. Shared links contain the two timestamps in the URL fragment. Synthetic examples do not establish customer outcomes or model accuracy.</p></footer>
 </main>
@@ -90,7 +91,18 @@ globalThis.PITTrial = (() => {
       rows: rows.map(row => ({record_id: row.record_id, value: row.value, available_at: formatUtc(row.available), known: row.event <= decision && row.available <= decision}))
     };
   }
-  return {parseUtc, select};
+  function inputs(fixture, decisionAt, correctionIngestedAt) {
+    // Validate the same two timestamps before offering a portable input case.
+    select(fixture, decisionAt, correctionIngestedAt);
+    return {
+      data_kind: "synthetic",
+      observations: fixture.observations.map(row => ({...row,
+        ingested_at: row.revision === 2 ? correctionIngestedAt : row.ingested_at})),
+      decisions: [{decision_id: "trial", entity_id: "SME-001", decision_at: decisionAt}],
+      specs: [{source: "tax", feature: "invoice_revenue", max_age_days: fixture.max_age_days}]
+    };
+  }
+  return {parseUtc, select, inputs};
 })();
 </script>
 <script id="trial-ui">
@@ -100,6 +112,13 @@ globalThis.PITTrial = (() => {
   const decision = document.getElementById("decision-at"), ingestion = document.getElementById("ingested-at");
   const error = document.getElementById("input-error"), output = document.getElementById("output"), share = document.getElementById("share");
   const shareStatus = document.getElementById("share-status");
+  const download = document.getElementById("download-case");
+  let downloadUrl = null;
+  function clearDownload() {
+    download.removeAttribute("href");
+    if (downloadUrl) URL.revokeObjectURL(downloadUrl);
+    downloadUrl = null;
+  }
   const initial = new URLSearchParams(location.hash.slice(1));
   if (initial.has("decision")) decision.value = initial.get("decision");
   if (initial.has("ingested")) ingestion.value = initial.get("ingested");
@@ -107,8 +126,12 @@ globalThis.PITTrial = (() => {
   const put = (id, value) => { document.getElementById(id).textContent = value; };
   function render() {
     shareStatus.textContent = "";
+    clearDownload();
     try {
       const result = PITTrial.select(fixture, decision.value, ingestion.value);
+      const inputs = PITTrial.inputs(fixture, decision.value, ingestion.value);
+      downloadUrl = URL.createObjectURL(new Blob([JSON.stringify(inputs, null, 2) + "\n"], {type: "application/json;charset=utf-8"}));
+      download.href = downloadUrl;
       error.hidden = true; output.hidden = false; share.disabled = false;
       put("safe-value", amount(result.value)); put("safe-record", result.status + (result.record_id ? " · " + result.record_id : ""));
       const reasons = {selected: "This revision was available by the decision and is within the freshness window.", no_history: "The observation event is still in the future.", not_available: "The event happened, but neither revision was available to this decision.", stale: "The known observation is outside the 90-day freshness window."};
@@ -132,7 +155,10 @@ globalThis.PITTrial = (() => {
     }
   }
   document.getElementById("timing-form").addEventListener("submit", event => { event.preventDefault(); render(); });
+  decision.addEventListener("input", render); ingestion.addEventListener("input", render);
   decision.addEventListener("change", render); ingestion.addEventListener("change", render);
+  window.addEventListener("pagehide", clearDownload);
+  window.addEventListener("pageshow", render);
   for (const button of document.querySelectorAll("[data-preset]")) button.addEventListener("click", () => {
     decision.value = button.dataset.preset; ingestion.value = "2026-04-03T00:00:00Z"; render();
   });

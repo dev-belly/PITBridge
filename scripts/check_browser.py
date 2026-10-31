@@ -78,8 +78,47 @@ if (document.documentElement.scrollWidth > window.innerWidth + 1) throw new Erro
 return 7;
 """
 
+TRIAL_EXPORT_SCRIPT = r"""
+const done = arguments[arguments.length - 1];
+(async () => {
+  const decision = document.getElementById('decision-at');
+  const ingestion = document.getElementById('ingested-at');
+  const link = document.getElementById('download-case');
+  if (!link || link.download !== 'pitbridge-scenario.json') throw new Error('Missing named download');
+  async function edit(stamp) {
+    ingestion.value = stamp;
+    ingestion.dispatchEvent(new Event('input', {bubbles: true}));
+    if (!link.href.startsWith('blob:')) throw new Error('Missing current export URL');
+    return (await fetch(link.href)).json();
+  }
+  decision.value = '2026-04-03T00:00:00Z';
+  const late = await edit('2026-04-03T00:00:00.000001Z');
+  if (!document.getElementById('safe-record').textContent.includes('invoice-v1'))
+    throw new Error('Input edit did not update visible selection');
+  const equal = await edit('2026-04-03T00:00:00Z');
+  if (!document.getElementById('safe-record').textContent.includes('invoice-v2'))
+    throw new Error('Cutoff equality did not update visible selection');
+  if (late.observations[1].ingested_at !== '2026-04-03T00:00:00.000001Z'
+      || equal.observations[1].ingested_at !== '2026-04-03T00:00:00Z')
+    throw new Error('Export is stale or lost microsecond precision');
+  ingestion.value = '2026-04-03T00:00:00.0000009Z';
+  ingestion.dispatchEvent(new Event('input', {bubbles: true}));
+  if (link.hasAttribute('href') || !document.getElementById('output').hidden)
+    throw new Error('Invalid input retained a downloadable case');
+  const downloaded = await edit('2026-04-03T00:00:00.000001Z');
+  if (document.documentElement.scrollWidth > innerWidth + 1) throw new Error('Export overflows viewport');
+  link.click();
+  return {downloaded, checks: 4};
+})().then(done, error => done({error: String(error)}));
+"""
+
 
 def browser_check(cases, root):
+    from pitbridge.bundle import decode_inputs, verify_bundle, write_bundle
+    from pitbridge.core import build_snapshot, reference_snapshot
+
+    downloads = root / "downloads"
+    downloads.mkdir()
     driver = shutil.which("chromedriver")
     if not driver:
         candidate = Path(os.environ.get("CHROMEWEBDRIVER", "")) / "chromedriver"
@@ -125,7 +164,10 @@ def browser_check(cases, root):
                 "capabilities": {
                     "alwaysMatch": {
                         "browserName": "chrome",
-                        "goog:chromeOptions": {"args": ["--headless=new", "--no-sandbox", "--disable-dev-shm-usage"]},
+                        "goog:chromeOptions": {
+                            "args": ["--headless=new", "--no-sandbox", "--disable-dev-shm-usage"],
+                            "prefs": {"download.default_directory": str(downloads), "download.prompt_for_download": False},
+                        },
                     }
                 }
             },
@@ -135,6 +177,7 @@ def browser_check(cases, root):
         )["sessionId"]
         selections = 0
         viewport_widths = []
+        downloaded_cases = 0
         for case in cases:
             if "viewport" in case:
                 call("POST", f"/session/{session}/window/rect", case["viewport"])
@@ -144,8 +187,35 @@ def browser_check(cases, root):
                 if width != case["viewport"]["width"]:
                     raise RuntimeError(f"Requested viewport width {case['viewport']['width']}, observed {width}")
                 viewport_widths.append(width)
-            selections += call("POST", f"/session/{session}/execute/sync", {"script": case.get("script", SCRIPT), "args": [case]})
-        print(json.dumps({"status": "passed", "browser": "Chrome", "reports": len(cases), "selections": selections, "viewport_widths": viewport_widths}))
+            route = "async" if case.get("export") else "sync"
+            result = call("POST", f"/session/{session}/execute/{route}", {"script": case.get("script", SCRIPT), "args": [case]})
+            if case.get("export"):
+                if "error" in result:
+                    raise AssertionError(result["error"])
+                downloaded = downloads / "pitbridge-scenario.json"
+                for _ in range(100):
+                    if downloaded.is_file():
+                        break
+                    time.sleep(0.05)
+                else:
+                    raise AssertionError("Chrome did not save the scenario download")
+                portable = json.loads(downloaded.read_text(encoding="utf-8"))
+                if portable != result["downloaded"] or portable.get("data_kind") != "synthetic":
+                    raise AssertionError("Downloaded bytes differ from the current synthetic scenario")
+                inputs = decode_inputs(portable)
+                rows = build_snapshot(*inputs)
+                if rows != reference_snapshot(*inputs) or len(rows) != 1 or rows[0].record_id != "invoice-v1" or rows[0].value != 100000:
+                    raise AssertionError("Downloaded scenario differs from visible browser selection")
+                report = root / f"downloaded-report-{downloaded_cases}"
+                write_bundle(portable, report)
+                if verify_bundle(report).get("verified") is not True:
+                    raise AssertionError("Downloaded case did not independently replay")
+                downloaded.unlink()
+                downloaded_cases += 1
+                selections += result["checks"]
+            else:
+                selections += result
+        print(json.dumps({"status": "passed", "browser": "Chrome", "reports": len(cases), "selections": selections, "viewport_widths": viewport_widths, "downloaded_cases_replayed": downloaded_cases}))
     finally:
         if session is not None:
             try:
@@ -179,6 +249,8 @@ def main():
                 },
                 {"file": "try.html", "script": TRIAL_SCRIPT, "viewport": {"width": 1280, "height": 1000}},
                 {"file": "try.html", "script": TRIAL_SCRIPT, "viewport": {"width": 390, "height": 844}},
+                {"file": "try.html", "script": TRIAL_EXPORT_SCRIPT, "export": True, "viewport": {"width": 1280, "height": 1000}},
+                {"file": "try.html", "script": TRIAL_EXPORT_SCRIPT, "export": True, "viewport": {"width": 390, "height": 844}},
             ],
             root,
         )
