@@ -114,6 +114,7 @@ globalThis.PITTrial = (() => {
   const shareStatus = document.getElementById("share-status");
   const download = document.getElementById("download-case");
   let downloadUrl = null;
+  let copying = false;
   function clearDownload() {
     download.removeAttribute("href");
     if (downloadUrl) URL.revokeObjectURL(downloadUrl);
@@ -132,7 +133,7 @@ globalThis.PITTrial = (() => {
       const inputs = PITTrial.inputs(fixture, decision.value, ingestion.value);
       downloadUrl = URL.createObjectURL(new Blob([JSON.stringify(inputs, null, 2) + "\n"], {type: "application/json;charset=utf-8"}));
       download.href = downloadUrl;
-      error.hidden = true; output.hidden = false; share.disabled = false;
+      error.hidden = true; output.hidden = false; share.disabled = copying;
       put("safe-value", amount(result.value)); put("safe-record", result.status + (result.record_id ? " · " + result.record_id : ""));
       const reasons = {selected: "This revision was available by the decision and is within the freshness window.", no_history: "The observation event is still in the future.", not_available: "The event happened, but neither revision was available to this decision.", stale: "The known observation is outside the 90-day freshness window."};
       put("safe-reason", reasons[result.status]); put("unsafe-value", amount(result.unsafe_value)); put("unsafe-record", result.unsafe_record_id || "no_history");
@@ -163,8 +164,18 @@ globalThis.PITTrial = (() => {
     decision.value = button.dataset.preset; ingestion.value = "2026-04-03T00:00:00Z"; render();
   });
   share.addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(location.href); shareStatus.textContent = "Scenario link copied."; }
-    catch { shareStatus.textContent = "Copy the address from your browser to share this scenario."; }
+    if (copying || share.disabled) return;
+    const copiedUrl = location.href;
+    copying = true; share.disabled = true;
+    shareStatus.textContent = "Copying scenario link...";
+    try {
+      await navigator.clipboard.writeText(copiedUrl);
+      if (!output.hidden && location.href === copiedUrl) shareStatus.textContent = "Scenario link copied.";
+    } catch {
+      if (!output.hidden && location.href === copiedUrl) shareStatus.textContent = "Copy the address from your browser to share this scenario.";
+    } finally {
+      copying = false; share.disabled = output.hidden;
+    }
   });
   render();
 })();

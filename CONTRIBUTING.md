@@ -124,6 +124,11 @@ at both viewport widths. Those downloaded bytes are decoded, compared with the
 visible selection and independently replayed. Keep exports explicitly synthetic;
 do not include browser results as already-verified evidence.
 
+The Chrome job also controls clipboard promises at both widths: an old completion
+must not confirm a changed or invalid scenario, pending writes remain serialized
+across edits, and a blocked clipboard keeps an address-bar fallback and retry.
+These checks exercise the shipped UI without writing to a runner's real clipboard.
+
 The `Chrome reports and no-install invoice lesson` CI job uses the Ubuntu runner's installed Chrome
 and matching chromedriver to select CR/LF, NUL and Unicode identities in the
 actual report. `python scripts/check_browser.py` reproduces the check where
