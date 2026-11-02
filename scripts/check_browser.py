@@ -113,6 +113,67 @@ const done = arguments[arguments.length - 1];
 """
 
 
+TRIAL_SHARE_SCRIPT = r"""
+const done = arguments[arguments.length - 1];
+(async () => {
+  const share = document.getElementById('share');
+  const status = document.getElementById('share-status');
+  const output = document.getElementById('output');
+  const ingestion = document.getElementById('ingested-at');
+  const presets = [...document.querySelectorAll('[data-preset]')];
+  const pending = [];
+  const descriptor = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
+  const flush = () => new Promise(resolve => setTimeout(resolve, 0));
+  Object.defineProperty(navigator, 'clipboard', {configurable: true, value: {
+    writeText: text => new Promise((resolve, reject) => pending.push({text, resolve, reject}))
+  }});
+  try {
+    presets[1].click();
+    share.click();
+    if (pending.length !== 1 || pending[0].text !== location.href || !share.disabled)
+      throw new Error('Copy did not capture and lock the current link');
+    presets[2].click();
+    if (!share.disabled || status.textContent !== '')
+      throw new Error('Editing unlocked a pending clipboard write or retained its message');
+    pending[0].resolve(); await flush();
+    if (share.disabled || status.textContent !== '')
+      throw new Error('An old copy confirmed a newer scenario');
+
+    share.click(); share.click();
+    if (pending.length !== 2 || pending[1].text !== location.href)
+      throw new Error('Repeated clicks started concurrent copies or captured the wrong link');
+    pending[1].resolve(); await flush();
+    if (share.disabled || status.textContent !== 'Scenario link copied.')
+      throw new Error('The current successful copy was not confirmed');
+
+    share.click();
+    ingestion.value = '2026-04-03T00:00:00.0000009Z';
+    ingestion.dispatchEvent(new Event('input', {bubbles: true}));
+    pending[2].reject(new Error('clipboard blocked')); await flush();
+    if (!output.hidden || !share.disabled || status.textContent !== '')
+      throw new Error('An obsolete failure changed an invalid scenario');
+
+    presets[1].click(); share.click();
+    pending[3].reject(new Error('clipboard unavailable')); await flush();
+    if (share.disabled || !status.textContent.includes('Copy the address'))
+      throw new Error('Current clipboard failure lost its fallback or retry');
+
+    share.click();
+    if (pending[4].text !== location.href) throw new Error('Retry copied an obsolete link');
+    pending[4].resolve(); await flush();
+    if (status.textContent !== 'Scenario link copied.' || share.disabled)
+      throw new Error('Retry did not recover after clipboard failure');
+    if (document.documentElement.scrollWidth > innerWidth + 1)
+      throw new Error('Share status overflows viewport');
+    return 6;
+  } finally {
+    if (descriptor) Object.defineProperty(navigator, 'clipboard', descriptor);
+    else delete navigator.clipboard;
+  }
+})().then(done, error => done({error: String(error)}));
+"""
+
+
 def browser_check(cases, root):
     from pitbridge.bundle import decode_inputs, verify_bundle, write_bundle
     from pitbridge.core import build_snapshot, reference_snapshot
@@ -187,11 +248,11 @@ def browser_check(cases, root):
                 if width != case["viewport"]["width"]:
                     raise RuntimeError(f"Requested viewport width {case['viewport']['width']}, observed {width}")
                 viewport_widths.append(width)
-            route = "async" if case.get("export") else "sync"
+            route = "async" if case.get("export") or case.get("async") else "sync"
             result = call("POST", f"/session/{session}/execute/{route}", {"script": case.get("script", SCRIPT), "args": [case]})
+            if isinstance(result, dict) and "error" in result:
+                raise AssertionError(result["error"])
             if case.get("export"):
-                if "error" in result:
-                    raise AssertionError(result["error"])
                 downloaded = downloads / "pitbridge-scenario.json"
                 for _ in range(100):
                     if downloaded.is_file():
@@ -251,6 +312,8 @@ def main():
                 {"file": "try.html", "script": TRIAL_SCRIPT, "viewport": {"width": 390, "height": 844}},
                 {"file": "try.html", "script": TRIAL_EXPORT_SCRIPT, "export": True, "viewport": {"width": 1280, "height": 1000}},
                 {"file": "try.html", "script": TRIAL_EXPORT_SCRIPT, "export": True, "viewport": {"width": 390, "height": 844}},
+                {"file": "try.html", "script": TRIAL_SHARE_SCRIPT, "async": True, "viewport": {"width": 1280, "height": 1000}},
+                {"file": "try.html", "script": TRIAL_SHARE_SCRIPT, "async": True, "viewport": {"width": 390, "height": 844}},
             ],
             root,
         )
