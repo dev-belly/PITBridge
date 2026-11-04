@@ -110,8 +110,10 @@ Wrong field counts, malformed quoting and row conversion errors name the file
 and physical end line of the CSV record, including multi-line records.
 Cross-table identity errors name the violated contract. A failed import exits
 with status 2 on stderr and creates no output directory; an existing report
-is untouched by an input-validation failure. Successful report commands can
-replace files, so use a separate output directory per trial.
+is untouched by an input-validation failure. From v0.2.3, report commands also
+refuse nonempty output directories, regular-file destinations and directory
+symlinks with exit 2. Use a new or empty directory for each trial; files that
+arrive during generation are protected by exclusive creation.
 
 `--inputs` and `--csv-dir` are mutually exclusive. The Python equivalent is:
 
@@ -120,7 +122,7 @@ from pitbridge import load_csv_inputs
 from pitbridge.bundle import write_bundle
 
 data = load_csv_inputs("my-tables")
-write_bundle(data, "outputs/csv")
+write_bundle(data, "outputs/pandas-csv")
 # For rolling tables: load_csv_inputs("my-tables", rolling=True),
 # then pitbridge.rolling_bundle.write_rolling_bundle(data, output).
 ```

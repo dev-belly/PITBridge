@@ -34,8 +34,8 @@ jobs:
           pitbridge verify-rolling --out demo/rolling
       - name: Generate and replay a fresh report
         run: |
-          pitbridge demo --out outputs
-          pitbridge verify --out outputs
+          pitbridge demo --out outputs/scalar
+          pitbridge verify --out outputs/scalar
           pitbridge rolling-demo --out outputs/rolling
           pitbridge verify-rolling --out outputs/rolling
   verify-pandas:

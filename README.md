@@ -35,7 +35,7 @@ dependencies**. The commands use a virtual environment without requiring
 activation.
 
 These commands clone `main` for the source examples. For a fixed installation
-without Git, use the [checked v0.2.2 wheel](#install-the-checked-release).
+without Git, use the [checked v0.2.3 wheel](#install-the-checked-release).
 v0.2.2 adds editable CSV generation with `init-csv`, alongside the installed
 CSV importer, rolling features and `benchmark`,
 and rejects unsupported timestamp precision before selection; the earlier
@@ -71,9 +71,14 @@ use `.venv/bin/python`; on Windows substitute `.\.venv\Scripts\python.exe`.
 Saved report files also keep LF endings when Git uses `core.autocrlf=true`, so
 the committed `demo` and `demo/rolling` bundles retain their hashes on Windows.
 
+Report commands (`demo`, `build`, `rolling-demo`, `aggregate`) require a new
+or empty output directory. Since v0.2.3, a nonempty directory, regular file or
+directory symlink returns exit 2 without replacing its contents. Choose a new
+output for each trial; a file arriving during writing is also never truncated.
+
 ```bash
 # Bring your own observations, decisions and feature specs:
-.venv/bin/python -m pitbridge build --inputs demo/inputs.json --out outputs
+.venv/bin/python -m pitbridge build --inputs demo/inputs.json --out outputs/from-json
 ```
 
 ## Install the checked release
@@ -83,21 +88,21 @@ Install this repository's wheel directly, using its full URL:
 
 ```bash
 python3 -m venv .venv
-.venv/bin/python -m pip install "https://github.com/dev-belly/PITBridge/releases/download/v0.2.2/pitbridge-0.2.2-py3-none-any.whl"
+.venv/bin/python -m pip install "https://github.com/dev-belly/PITBridge/releases/download/v0.2.3/pitbridge-0.2.3-py3-none-any.whl"
 .venv/bin/python -m pitbridge demo --out outputs
 .venv/bin/python -m pitbridge verify --out outputs
 ```
 
 On Windows, create the environment with `python -m venv .venv` and substitute
 `.\.venv\Scripts\python.exe` for `.venv/bin/python`.
-The [release page](https://github.com/dev-belly/PITBridge/releases/tag/v0.2.2)
+The [release page](https://github.com/dev-belly/PITBridge/releases/tag/v0.2.3)
 also provides the source archive, `installed-check.json`, an exact-commit
 `release-manifest.json` and `CHECKSUMS.sha256`. The wheel is built from the
 source archive, installed in a fresh environment outside the checkout and
 used for scalar/rolling JSON and CSV replay, timestamp-precision checks and a small benchmark. Publishing
 waits for the complete main CI, including Windows, pandas and Chrome jobs;
 the publisher verifies the exact CI artifacts instead of rebuilding them.
-[Release notes and replay compatibility](docs/releases/v0.2.2.md) ·
+[Release notes and replay compatibility](docs/releases/v0.2.3.md) ·
 [Reproduce the release checks](docs/RELEASING.md).
 
 ## Use the Python API
@@ -152,7 +157,7 @@ The rolling case has ten observations, four decisions and three specifications.
 The 30-day sums for SME-A are 1,500 / 4,300 / 6,300 on February 10 / 11 / 12;
 inspect `members.csv` to trace the available revisions. These are synthetic
 teaching amounts, not observed business results. v0.2.1 and earlier lack
-`init-csv`; use the checked v0.2.2 wheel or current source.
+`init-csv`; use the checked v0.2.3 wheel or current source.
 
 The [CSV contract](docs/CSV_INPUTS.md) covers headers, nulls, revisions, timestamps
 and rolling tables. The [optional pandas example](examples/README.md#optional-pandascsv-input)

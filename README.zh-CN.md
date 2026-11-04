@@ -27,8 +27,8 @@ PITBridge 同时处理数据发生时间、公开时间、入库时间和修订�
 
 需要 Git 和 Python 3.11 或更高版本。下面是 Windows PowerShell 命令，使用独立环境，无需先激活：
 
-这些命令克隆 `main` 以运行源码示例。固定安装可使用下面的 v0.2.2 wheel，
-其中新增 `init-csv` 可编辑模板生成，并包含 CSV 接入、滚动特征、`benchmark` 及时间精度校验。
+这些命令克隆 `main` 以运行源码示例。固定安装可使用下面的 v0.2.3 wheel，
+其中包含 `init-csv` 可编辑模板生成、CSV 接入、滚动特征、`benchmark` 及时间精度校验。
 较早的 v0.1.0 标签不包含内置 CSV 接入和 benchmark。
 
 ```powershell
@@ -44,6 +44,10 @@ python -m venv .venv
 Linux / macOS 用 `python3 -m venv .venv` 创建环境，并将上述 `.\.venv\Scripts\python.exe` 换成 `.venv/bin/python`；完整命令见[英文快速运行](README.md#run-in-one-minute)。
 
 打开 `outputs/report.html` 即可查看离线报告。无第三方运行依赖，安装与示例在 Linux 和 Windows CI 中检查。
+
+报告命令 `demo`、`build`、`rolling-demo`、`aggregate` 使用新的或空的输出目录。
+从 v0.2.3 起，非空目录、已有普通文件和目录符号链接会返回退出码 2，保留已有内容。
+每次试验换一个输出目录；写入期间出现同名文件时也不会截断它。
 仓库用 `.gitattributes` 保留 LF 换行；Windows Git 开启 `core.autocrlf=true` 时，已保存的快照和滚动报告也保持原哈希。
 
 ## 安装经过检查的发布版
@@ -52,16 +56,16 @@ Linux / macOS 用 `python3 -m venv .venv` 创建环境，并将上述 `.\.venv\S
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install "https://github.com/dev-belly/PITBridge/releases/download/v0.2.2/pitbridge-0.2.2-py3-none-any.whl"
+.\.venv\Scripts\python.exe -m pip install "https://github.com/dev-belly/PITBridge/releases/download/v0.2.3/pitbridge-0.2.3-py3-none-any.whl"
 .\.venv\Scripts\python.exe -m pitbridge demo --out outputs
 .\.venv\Scripts\python.exe -m pitbridge verify --out outputs
 ```
 
-[发布页面](https://github.com/dev-belly/PITBridge/releases/tag/v0.2.2)同时提供源码包、
+[发布页面](https://github.com/dev-belly/PITBridge/releases/tag/v0.2.3)同时提供源码包、
 安装核验记录、固定提交号的发布清单和 SHA-256 校验值。wheel 从源码包构建，
 在离开源码目录的干净环境中检查四条 JSON/CSV 路径、时间精度及小规模 benchmark；
 完整主分支 CI（包括 Windows、pandas 和 Chrome）通过后才发布同一份产物。
-[升级与重放边界](docs/releases/v0.2.2.md) · [复现发布检查](docs/RELEASING.md)。
+[升级与重放边界](docs/releases/v0.2.3.md) · [复现发布检查](docs/RELEASING.md)。
 
 ## 可直接复用的 Python 案例
 

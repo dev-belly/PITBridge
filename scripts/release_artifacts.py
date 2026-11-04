@@ -73,6 +73,27 @@ def validate_check(path: Path, version: str) -> None:
                 raise ValueError(
                     "Installed JSON and CSV scalar/rolling replay evidence is required"
                 )
+    protection = check.get("report_outputs")
+    if not isinstance(protection, dict) or set(protection) != {"scalar", "rolling"}:
+        raise ValueError("Installed report-output protection evidence is required")
+    for mode in ("scalar", "rolling"):
+        evidence = protection[mode]
+        if (
+            not isinstance(evidence, dict)
+            or type(evidence.get("rejected_routes")) is not int
+            or evidence["rejected_routes"] != 9
+            or any(
+                evidence.get(field) is not True
+                for field in (
+                    "existing_report_preserved",
+                    "foreign_directory_preserved",
+                    "existing_file_preserved",
+                )
+            )
+        ):
+            raise ValueError(
+                "Installed report-output protection evidence is incomplete"
+            )
     starters = check.get("csv_starters")
     if not isinstance(starters, dict):
         raise ValueError("Installed editable CSV starter evidence is required")
