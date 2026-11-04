@@ -39,7 +39,8 @@ At exact equality it selects `invoice-v2` / 135,000, matching the browser.
 `verify` checks every saved file and replays the snapshot through SQLite and
 the independent Python enumerator. The download is **input data**, not a
 verified report, signed evidence or observed borrower data. The checked
-v0.2.2 wheel accepts this existing JSON contract; no new package release is needed.
+v0.2.3 wheel accepts this existing JSON contract. Use a new or empty output
+directory for each replay so earlier report bytes remain available.
 
 ## Run the notebook or source example
 

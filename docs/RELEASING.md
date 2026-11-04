@@ -18,6 +18,13 @@ changing input bytes, then edits an arrival and verifies the changed scalar
 selection. Publication requires this editable-starter evidence alongside the
 existing timestamp, JSON/CSV replay and benchmark checks.
 
+Installed report-output checks run all six demo/JSON/CSV routes against an
+existing report, a directory containing review notes and a regular file.
+All 18 commands must return exit 2 without success JSON, tracebacks or changed
+destination bytes. The publisher requires nine rejected routes per mode and
+all preservation flags. Missing/false evidence is rejected even when an edited
+asset's hash and checksum list are recomputed.
+
 To reproduce from a clean checkout with no stale files in `dist` or `release`:
 
 ```bash

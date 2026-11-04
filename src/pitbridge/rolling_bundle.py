@@ -7,7 +7,7 @@ from html import escape
 import json
 from pathlib import Path
 
-from .bundle import canonical, csv_text, read_json
+from .bundle import _report_target, _write_report_files, canonical, csv_text, read_json
 from .core import Decision, Observation
 from .rolling import RollingFeature, RollingMember, RollingSpec, build_rolling, reference_rolling, validate_rolling
 
@@ -110,14 +110,11 @@ def rolling_artifacts(data):
 
 
 def write_rolling_bundle(data, out):
+    target = _report_target(out)
     artifacts = rolling_artifacts(data)
-    target = Path(out)
-    target.mkdir(parents=True, exist_ok=True)
-    for name, content in artifacts.items():
-        (target/name).write_text(content, encoding="utf-8", newline="")
     manifest = {"schema_version": 1, "engine": ENGINE,
         "files": {name: sha256(content.encode()).hexdigest() for name, content in sorted(artifacts.items())}}
-    (target/"manifest.json").write_text(canonical(manifest), encoding="utf-8")
+    _write_report_files({**artifacts, "manifest.json": canonical(manifest)}, target)
     return read_json(target/"summary.json")
 
 

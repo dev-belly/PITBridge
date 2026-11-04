@@ -129,16 +129,31 @@ def artifacts(data):
     return {"inputs.json": canonical(normalized), "snapshots.csv": csv_text([asdict(r) for r in rows], list(asdict(rows[0]))), "comparison.csv": csv_text(comparison, list(comparison[0])), "summary.json": canonical(summary), "report.html": render_report(summary, comparison, rows)}
 
 
-def write_bundle(data, out):
-    files = artifacts(data)
+def _report_target(out):
     target = Path(out)
+    if target.is_symlink() or (target.exists() and (not target.is_dir() or any(target.iterdir()))):
+        raise FileExistsError("Choose a new or empty report directory; existing files are never overwritten")
+    return target
+
+
+def _write_report_files(files, out):
+    target = _report_target(out)
     target.mkdir(parents=True, exist_ok=True)
+    _report_target(target)
     for name, content in files.items():
-        (target / name).write_text(content, encoding="utf-8", newline="")
+        # Exclusive creation also protects a member that arrives after preflight.
+        # Keep the existing manifest newline convention on each platform.
+        with (target / name).open("x", encoding="utf-8", newline=None if name == "manifest.json" else "") as handle:
+            handle.write(content)
+
+
+def write_bundle(data, out):
+    target = _report_target(out)
+    files = artifacts(data)
     # This legacy string identifies the scalar bundle format, not the package
     # version. A package release must not relabel or invalidate saved bundles.
     manifest = {"schema_version": 1, "engine": "pitbridge/0.1.0", "files": {name: sha256(content.encode()).hexdigest() for name, content in sorted(files.items())}}
-    (target / "manifest.json").write_text(canonical(manifest), encoding="utf-8")
+    _write_report_files({**files, "manifest.json": canonical(manifest)}, target)
     return read_json(target / "summary.json")
 
 

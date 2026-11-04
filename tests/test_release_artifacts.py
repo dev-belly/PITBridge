@@ -37,6 +37,15 @@ class ReleaseArtifactTests(unittest.TestCase):
             "scalar": scalar,
             "rolling": rolling,
             "csv": {"scalar": scalar, "rolling": rolling},
+            "report_outputs": {
+                mode: {
+                    "rejected_routes": 9,
+                    "existing_report_preserved": True,
+                    "foreign_directory_preserved": True,
+                    "existing_file_preserved": True,
+                }
+                for mode in ("scalar", "rolling")
+            },
             "csv_starters": {
                 mode: {
                     "created": {
@@ -120,6 +129,65 @@ class ReleaseArtifactTests(unittest.TestCase):
                 self.assertRaisesRegex(ValueError, "commit"),
             ):
                 release.verify(self.destination, commit)
+
+    def test_report_output_protection_is_required_even_after_asset_rehashing(self):
+        original = copy.deepcopy(self.result)
+        mutations = [
+            (None, None, None),
+            ("scalar", None, None),
+            ("rolling", None, None),
+        ]
+        for mode in ("scalar", "rolling"):
+            mutations.extend(
+                (mode, field, False)
+                for field in (
+                    "existing_report_preserved",
+                    "foreign_directory_preserved",
+                    "existing_file_preserved",
+                )
+            )
+            mutations.extend(
+                (mode, "rejected_routes", value) for value in (8, "9", True)
+            )
+        for mode, field, value in mutations:
+            self.result = copy.deepcopy(original)
+            if mode is None:
+                self.result.pop("report_outputs")
+            elif field is None:
+                self.result["report_outputs"].pop(mode)
+            else:
+                self.result["report_outputs"][mode][field] = value
+            self.write_check()
+            with (
+                self.subTest(mode=mode, field=field, value=value),
+                self.assertRaisesRegex(ValueError, "report-output"),
+            ):
+                self.prepare()
+            self.assertFalse(self.destination.exists())
+
+        self.result = copy.deepcopy(original)
+        self.write_check()
+        self.prepare()
+        self.result["report_outputs"]["scalar"]["existing_report_preserved"] = False
+        (self.destination / "installed-check.json").write_text(
+            json.dumps(self.result), encoding="utf-8"
+        )
+        manifest_path = self.destination / "release-manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["files_sha256"]["installed-check.json"] = release.digest(
+            self.destination / "installed-check.json"
+        )
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+        (self.destination / "CHECKSUMS.sha256").write_text(
+            release.checksum_text(
+                self.destination,
+                release.expected_files(self.version) | {"release-manifest.json"},
+            ),
+            encoding="utf-8",
+            newline="",
+        )
+        with self.assertRaisesRegex(ValueError, "report-output"):
+            release.verify(self.destination, self.commit)
 
     def test_missing_any_installed_input_route_prevents_publication(self):
         original = copy.deepcopy(self.result)

@@ -232,6 +232,60 @@ def check(directory: Path) -> dict:
                     raise ValueError(
                         f"JSON/CSV installed-package evidence differs: {name}/{filename}"
                     )
+        output_protection = {}
+        for name, demo_command, command in (
+            ("scalar", "demo", "build"),
+            ("rolling", "rolling-demo", "aggregate"),
+        ):
+            report = work / name
+            foreign = work / f"{name}-foreign-directory"
+            foreign.mkdir()
+            (foreign / "notes.txt").write_bytes(b"preserve my review notes")
+            existing_file = work / f"{name}-foreign-file"
+            existing_file.write_bytes(b"preserve my source file")
+            evidence = {}
+            for kind, destination in (
+                ("existing_report", report),
+                ("foreign_directory", foreign),
+                ("existing_file", existing_file),
+            ):
+
+                def contents(destination=destination):
+                    return (
+                        {p.name: p.read_bytes() for p in destination.iterdir()}
+                        if destination.is_dir()
+                        else {destination.name: destination.read_bytes()}
+                    )
+
+                before = contents()
+                routes = (
+                    (demo_command,),
+                    (command, "--inputs", str(report / "inputs.json")),
+                    (command, "--csv-dir", str(work / f"{name}-tables")),
+                )
+                for route in routes:
+                    rejected = subprocess.run(
+                        (str(cli), *route, "--out", str(destination)),
+                        cwd=work,
+                        env=environment,
+                        text=True,
+                        encoding="utf-8",
+                        errors="replace",
+                        capture_output=True,
+                        check=False,
+                    )
+                    if (
+                        rejected.returncode != 2
+                        or rejected.stdout
+                        or "Traceback" in rejected.stderr
+                        or "new or empty report" not in rejected.stderr
+                        or contents() != before
+                    ):
+                        raise ValueError(
+                            f"Installed {name} {kind} output protection failed"
+                        )
+                evidence[f"{kind}_preserved"] = True
+            output_protection[name] = {"rejected_routes": 9, **evidence}
         starter_results = {}
         for name, command, check_command, comparison_files in (
             ("scalar", "build", "verify", ("snapshots.csv", "comparison.csv")),
@@ -339,6 +393,7 @@ def check(directory: Path) -> dict:
             "scalar": scalar,
             "rolling": rolling,
             "csv": csv_results,
+            "report_outputs": output_protection,
             "csv_starters": starter_results,
             "benchmark": benchmark,
         }

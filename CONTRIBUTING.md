@@ -33,6 +33,13 @@ If changing reports or exports, regenerate and verify both bundles:
 .venv/bin/python -m pitbridge verify-rolling --out outputs/rolling
 ```
 
+Choose new or empty report destinations for each run. Scalar and rolling
+writers reject nonempty directories and existing file/link targets before
+writing; exclusive member creation also preserves a file that arrives later.
+The regressions in `tests/test_report_destinations.py` cover both writers and
+all six demo/JSON/CSV CLI routes. If an I/O failure leaves a partial report,
+inspect it separately and retry with a fresh output directory.
+
 The core CI jobs use the package's default installation without pandas. Native
 CSV intake tests always run; only optional pandas-example tests skip in that
 environment. To run those tests when the example
