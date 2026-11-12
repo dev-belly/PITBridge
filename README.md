@@ -1,6 +1,8 @@
-<img src="assets/hero.svg" width="100%" alt="PITBridge · data, method and replayable evidence" />
-
 # PITBridge
+
+*Decision-time data. Source-level proof.*
+
+Source clocks → revision winners → features. Data, method and replayable evidence.
 
 **Financial features as they were known when a decision was made.**
 
