@@ -89,7 +89,7 @@ mean; count measures observations, not borrowers, invoices or days.
 Complete source coverage, unit/currency conversion, streaming ingestion,
 distributed throughput and CreditVintage integration remain outside scope.
 
-## 面试追问
+## 选择顺序与缺失值说明
 
 **为什么不能先加总最近 30 天，再检查发布时间？** 未来修订已经改变了结果。必须先决定当时能看到哪个版本，再对合法成员聚合。
 

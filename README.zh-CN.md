@@ -157,7 +157,7 @@ PITBridge 现在不仅是独立演示组件，也被
 完整单位、UTC 约定和适配边界见
 [CreditVintage 的 LINEAGE 文档](https://github.com/dev-belly/CreditVintage/blob/main/docs/LINEAGE.md)。
 
-[方法与规则](docs/METHODOLOGY.md) · [输入字段](docs/DATA_CONTRACT.md) · [中文面试问答及简历表述](docs/INTERVIEW.md)
+[方法与规则](docs/METHODOLOGY.md) · [输入字段](docs/DATA_CONTRACT.md)
 
 这是可以核验的金融数据工程研究组件。演示数据全部为合成；没有宣称接入真实银行、降低实际违约率或处理生产规模数据。
 
